@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>com.jason</groupId>
+        <artifactId>jason-modules</artifactId>
+        <version>4.0</version>
+    </parent>
+    <artifactId>jason-photography-dao</artifactId>
+    <description>坤坤摄影展持久层</description>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.jason</groupId>
+            <artifactId>jason-common-database</artifactId>
+            <version>4.0</version>
+        </dependency>
+
+    </dependencies>
+
+</project>

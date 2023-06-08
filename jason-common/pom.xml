@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <groupId>com.jason</groupId>
+        <artifactId>jason-photography</artifactId>
+        <version>4.0</version>
+    </parent>
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>jason-common</artifactId>
+    <description>公共模块</description>
+    <packaging>pom</packaging>
+
+    <modules>
+        <module>jason-common-core</module>
+        <module>jason-common-web</module>
+        <module>jason-common-file</module>
+        <module>jason-common-http</module>
+        <module>jason-common-log</module>
+        <module>jason-common-redis</module>
+        <module>jason-common-database</module>
+    </modules>
+
+    <dependencies>
+    </dependencies>
+
+</project>
