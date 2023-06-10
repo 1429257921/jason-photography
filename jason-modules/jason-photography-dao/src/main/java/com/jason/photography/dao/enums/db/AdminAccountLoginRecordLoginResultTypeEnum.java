@@ -26,13 +26,13 @@ public enum AdminAccountLoginRecordLoginResultTypeEnum implements IEnum<Integer>
     ;
     @EnumValue
     @JsonValue
-    private final int value;
+    private final Integer value;
     private final String desc;
 
     public static AdminAccountLoginRecordLoginResultTypeEnum getEnum(Integer value) {
         if (value != null) {
             for (AdminAccountLoginRecordLoginResultTypeEnum valueEnum : AdminAccountLoginRecordLoginResultTypeEnum.values()) {
-                if (valueEnum.getValue() == value) {
+                if (valueEnum.getValue().equals(value)) {
                     return valueEnum;
                 }
             }

@@ -24,13 +24,13 @@ public enum AdminAccountStatusEnum implements IEnum<Integer> {
     ;
     @EnumValue
     @JsonValue
-    private final int value;
+    private final Integer value;
     private final String desc;
 
     public static AdminAccountStatusEnum getEnum(Integer value) {
         if (value != null) {
             for (AdminAccountStatusEnum valueEnum : AdminAccountStatusEnum.values()) {
-                if (valueEnum.getValue() == value) {
+                if (valueEnum.getValue().equals(value)) {
                     return valueEnum;
                 }
             }

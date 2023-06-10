@@ -1,13 +1,13 @@
 package com.jason.photography.admin.controller;
 
-import com.jason.photography.admin.service.AdminAdminAccountLoginRecordService;
+import com.jason.photography.admin.service.AdminAccountService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * 管理端用户登录记录表控制层
+ * 管理端用户表控制层
  *
  * @author guozhongcheng
  * @since 2023-06-11
@@ -16,9 +16,9 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("api")
-public class AdminAdminAccountLoginRecordController {
+public class AdminAccountController {
 
-    private final AdminAdminAccountLoginRecordService adminAccountLoginRecordService;
+    private final AdminAccountService adminAccountService;
 
 
 

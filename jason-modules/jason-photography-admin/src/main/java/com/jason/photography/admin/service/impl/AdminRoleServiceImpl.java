@@ -1,8 +1,8 @@
 package com.jason.photography.admin.service.impl;
 
-import com.jason.photography.dao.entity.po.AdminAccountLoginRecord;
-import com.jason.photography.dao.mapper.AdminAccountLoginRecordMapper;
-import com.jason.photography.admin.service.AdminAdminAccountLoginRecordService;
+import com.jason.photography.dao.entity.po.AdminRole;
+import com.jason.photography.dao.mapper.AdminRoleMapper;
+import com.jason.photography.admin.service.AdminRoleService;
 import com.jason.common.database.service.impl.BaseServiceImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,7 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
-public class AdminAdminAccountLoginRecordServiceImpl extends BaseServiceImpl<AdminAccountLoginRecordMapper, AdminAccountLoginRecord> implements AdminAdminAccountLoginRecordService {
+public class AdminRoleServiceImpl extends BaseServiceImpl<AdminRoleMapper, AdminRole> implements AdminRoleService {
 
 
 }

@@ -1,6 +1,6 @@
 package com.jason.photography.admin.controller;
 
-import com.jason.photography.admin.service.AdminAdminRoleService;
+import com.jason.photography.admin.service.AdminRoleService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -16,9 +16,9 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("api")
-public class AdminAdminRoleController {
+public class AdminRoleController {
 
-    private final AdminAdminRoleService adminRoleService;
+    private final AdminRoleService adminRoleService;
 
 
 

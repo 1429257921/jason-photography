@@ -1,7 +1,7 @@
 package com.jason.photography.dao.mapper;
 
-import com.jason.photography.dao.entity.po.AdminPermission;
 import com.jason.common.database.mapper.CoreMapper;
+import com.jason.photography.dao.entity.po.AdminPermission;
 
 /**
  * 管理端权限表t_admin_permission表持久层接口

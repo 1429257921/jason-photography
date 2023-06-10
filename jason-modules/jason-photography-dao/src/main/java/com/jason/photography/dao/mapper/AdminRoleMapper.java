@@ -1,7 +1,7 @@
 package com.jason.photography.dao.mapper;
 
-import com.jason.photography.dao.entity.po.AdminRole;
 import com.jason.common.database.mapper.CoreMapper;
+import com.jason.photography.dao.entity.po.AdminRole;
 
 /**
  * 管理端角色表t_admin_role表持久层接口

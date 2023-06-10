@@ -1,13 +1,13 @@
 package com.jason.photography.admin.controller;
 
-import com.jason.photography.admin.service.AdminAdminPermissionService;
+import com.jason.photography.admin.service.AdminRolePermissionService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * 管理端权限表控制层
+ * 管理端角色权限关联表控制层
  *
  * @author guozhongcheng
  * @since 2023-06-11
@@ -16,9 +16,9 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("api")
-public class AdminAdminPermissionController {
+public class AdminRolePermissionController {
 
-    private final AdminAdminPermissionService adminPermissionService;
+    private final AdminRolePermissionService adminRolePermissionService;
 
 
 

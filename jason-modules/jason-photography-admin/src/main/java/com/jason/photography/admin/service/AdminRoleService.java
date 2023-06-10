@@ -9,6 +9,6 @@ import com.jason.common.database.service.BaseService;
  * @author guozhongcheng
  * @since 2023-06-11
  */
-public interface AdminAdminRoleService extends BaseService<AdminRole> {
+public interface AdminRoleService extends BaseService<AdminRole> {
 
 }

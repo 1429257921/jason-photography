@@ -1,7 +1,7 @@
 package com.jason.photography.dao.mapper;
 
-import com.jason.photography.dao.entity.po.AdminAccount;
 import com.jason.common.database.mapper.CoreMapper;
+import com.jason.photography.dao.entity.po.AdminAccount;
 
 /**
  * 管理端用户表t_admin_account表持久层接口
