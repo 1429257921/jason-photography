@@ -2,6 +2,7 @@ package com.jason.gen.config;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
@@ -134,7 +135,7 @@ public class GenFieldEnumHandler implements ITypeConvertHandler {
                     + GenConstant.JASON_PHOTOGRAPHY_DAO_ENUM_PACKAGE_PATH + SEPARATOR
                     + remarksEnumInfo.getEnumFileName() + ".java";
             // 生成枚举类
-            File outputFile = new File(outputFilePath);
+            File outputFile = FileUtil.touch(outputFilePath);
 //            System.out.println("outputFilePath->" + outputFilePath);
             String templatePath = projectPath + SEPARATOR + GenConstant.JASON_GEN_TEMPLATES_PATH;
             File templateFile = new File(templatePath);
