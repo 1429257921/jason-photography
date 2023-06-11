@@ -20,8 +20,6 @@ public class JasonPhotographyAdminApplication {
 
     public static void main(String[] args) {
         SpringApplication springApplication = new SpringApplication(JasonPhotographyAdminApplication.class);
-        // 允许循环依赖
-        springApplication.setAllowCircularReferences(true);
         printConfigInfo(springApplication.run(args));
     }
 

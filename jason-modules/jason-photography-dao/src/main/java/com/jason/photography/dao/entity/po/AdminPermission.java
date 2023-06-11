@@ -47,9 +47,9 @@ public class AdminPermission implements Serializable {
 	 */
 	private Integer sort;
 	/**
-	 * 状态（0、正常，1、禁用）
+	 * 启用状态（0、正常，1、禁用）
 	 */
-	private AdminPermissionStatusEnum status;
+	private StatusEnum status = StatusEnum.qy0;
 	/**
 	 * 备注
 	 */
@@ -59,7 +59,7 @@ public class AdminPermission implements Serializable {
 	 */
 	@TableField("del_flag")
 	@TableLogic
-	private Byte deleted = 0;
+	private DelFlagEnum deleted = DelFlagEnum.zc0;
 	/**
 	 * 创建者ID
 	 */

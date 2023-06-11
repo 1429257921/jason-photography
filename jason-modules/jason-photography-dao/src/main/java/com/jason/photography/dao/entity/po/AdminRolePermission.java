@@ -1,6 +1,7 @@
 package com.jason.photography.dao.entity.po;
 
 import com.baomidou.mybatisplus.annotation.*;
+import com.jason.photography.dao.enums.db.DelFlagEnum;
 import lombok.*;
 
 import java.io.Serial;
@@ -50,7 +51,7 @@ public class AdminRolePermission implements Serializable {
 	 */
 	@TableField("del_flag")
 	@TableLogic
-	private Byte deleted = 0;
+	private DelFlagEnum deleted = DelFlagEnum.zc0;
 	/**
 	 * 创建者ID
 	 */

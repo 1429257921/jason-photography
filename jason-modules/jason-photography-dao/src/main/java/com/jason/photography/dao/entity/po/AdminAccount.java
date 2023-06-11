@@ -55,9 +55,9 @@ public class AdminAccount implements Serializable {
 	 */
 	private String nick;
 	/**
-	 * 账号状态（0、启用，1、禁用）
+	 * 启用状态（0、启用，1、禁用）
 	 */
-	private AdminAccountStatusEnum status;
+	private StatusEnum status = StatusEnum.qy0;
 	/**
 	 * 备注
 	 */
@@ -67,7 +67,7 @@ public class AdminAccount implements Serializable {
 	 */
 	@TableField("del_flag")
 	@TableLogic
-	private Byte deleted = 0;
+	private DelFlagEnum deleted = DelFlagEnum.zc0;
 	/**
 	 * 创建者ID
 	 */

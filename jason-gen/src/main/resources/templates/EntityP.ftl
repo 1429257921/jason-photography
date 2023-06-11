@@ -77,17 +77,17 @@ public class ${entity} implements Serializable {
 	    <#elseif field.annotationColumnName == "update_time">
 	@TableField(fill = FieldFill.INSERT_UPDATE, updateStrategy = FieldStrategy.NOT_EMPTY)
 	    </#if>
-		<#if field.annotationColumnName ? contains("status") || field.annotationColumnName ? contains("type")>
-			<#if field.annotationColumnName ? contains("（") && field.annotationColumnName ? contains("）")>
-	@TableField(fill = FieldFill.INSERT)
-			</#if>
-		</#if>
+    </#if>
+<#-- 启用状态 -->
+    <#if field.annotationColumnName == "status">
+	private ${field.propertyType} status = ${field.propertyType}.qy0;
+        <#continue>
     </#if>
     <#-- 逻辑删除注解 -->
-    <#if field.annotationColumnName == "del_flag" || field.annotationColumnName == "is_deleted">
+    <#if field.annotationColumnName == "del_flag">
 	@TableField("${field.annotationColumnName}")
 	@TableLogic
-	private Byte deleted = 0;
+	private ${field.propertyType} deleted = ${field.propertyType}.zc0;
 		<#continue>
     </#if>
 	private ${field.propertyType} ${field.propertyName};

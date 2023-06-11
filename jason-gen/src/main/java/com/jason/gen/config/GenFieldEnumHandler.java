@@ -5,7 +5,6 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.util.StrUtil;
-import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.generator.config.GlobalConfig;
 import com.baomidou.mybatisplus.generator.config.po.TableField;
 import com.baomidou.mybatisplus.generator.config.rules.IColumnType;
@@ -19,6 +18,7 @@ import com.jason.gen.util.GenCommonUtil;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.*;
 import java.nio.charset.Charset;
@@ -35,7 +35,7 @@ import java.util.Properties;
 @Slf4j
 public class GenFieldEnumHandler implements ITypeConvertHandler {
 
-    private static final String SEPARATOR = File.separator;
+    private static final String SEPARATOR = GenConstant.SEPARATOR;
 
     private static final Properties PROPERTIES = new Properties();
 
@@ -50,8 +50,9 @@ public class GenFieldEnumHandler implements ITypeConvertHandler {
     }
 
     @Override
+    @NotNull
     public IColumnType convert(GlobalConfig globalConfig, TypeRegistry typeRegistry, TableField.MetaInfo metaInfo) {
-        IColumnType columnType = fieldTypeConvert(typeRegistry, metaInfo);
+        IColumnType columnType = fieldTypeConvert(globalConfig, typeRegistry, metaInfo);
 
         if (GenConstant.DAO.equals(GenPhotographyRun.CURRENT_MODULES)) {
             ColumnInfo columnInfo = ColumnInfo.build(metaInfo);
@@ -65,7 +66,7 @@ public class GenFieldEnumHandler implements ITypeConvertHandler {
         return columnType;
     }
 
-    private IColumnType fieldTypeConvert(TypeRegistry typeRegistry, TableField.MetaInfo metaInfo) {
+    private IColumnType fieldTypeConvert(GlobalConfig globalConfig, TypeRegistry typeRegistry, TableField.MetaInfo metaInfo) {
         String fieldType = metaInfo.getJdbcType().name();
         IColumnType columnType = null;
         String convertTypeName = null;
@@ -91,8 +92,9 @@ public class GenFieldEnumHandler implements ITypeConvertHandler {
                 @Override
                 public String getType() {
                     ColumnInfo columnInfo = ColumnInfo.build(metaInfo);
+                    RemarksEnumInfo enumInfo = RemarksEnumInfo.build(columnInfo, globalConfig);
                     // 你想修改的类型
-                    return GenCommonUtil.getEnumFileName(columnInfo.getTableName(), columnInfo.getColumnName());
+                    return enumInfo.getEnumFileName();
                 }
 
                 @Override
@@ -123,10 +125,15 @@ public class GenFieldEnumHandler implements ITypeConvertHandler {
         return columnType == null ? typeRegistry.getColumnType(metaInfo) : columnType;
     }
 
+    /**
+     * 生成枚举文件
+     *
+     * @param remarksEnumInfo 列注释枚举信息
+     */
     private void createEnumFile(RemarksEnumInfo remarksEnumInfo) {
         Map<String, Object> dataMap = BeanUtil.beanToMap(remarksEnumInfo);
         try {
-            System.out.println(JSONUtil.toJsonPrettyStr(dataMap));
+//            System.out.println(JSONUtil.toJsonPrettyStr(dataMap));
             String projectPath = GenPhotographyRun.GEN_CONFIG_DATA.getProjectPath();
             String outputFilePath = projectPath + SEPARATOR
                     + GenConstant.PROJECT_MODULES_NAME + SEPARATOR
@@ -134,6 +141,9 @@ public class GenFieldEnumHandler implements ITypeConvertHandler {
                     + GenConstant.JAVA_PATH + SEPARATOR
                     + GenConstant.JASON_PHOTOGRAPHY_DAO_ENUM_PACKAGE_PATH + SEPARATOR
                     + remarksEnumInfo.getEnumFileName() + ".java";
+            if (FileUtil.exist(outputFilePath)) {
+                return;
+            }
             // 生成枚举类
             File outputFile = FileUtil.touch(outputFilePath);
 //            System.out.println("outputFilePath->" + outputFilePath);
