@@ -19,7 +19,7 @@
         <spring-boot.version>3.1.0</spring-boot.version>
         <lombok.version>1.18.28</lombok.version>
         <hutool-version>5.8.19</hutool-version>
-        <okhttp.version>4.10.0</okhttp.version>
+        <okhttp.version>4.11.0</okhttp.version>
         <spring-boot.mybatis-plus.version>3.5.3.1</spring-boot.mybatis-plus.version>
         <mysql-connector-version>8.0.28</mysql-connector-version>
         <spring-boot-druid.version>1.2.18</spring-boot-druid.version>
@@ -27,6 +27,10 @@
         <jackson.version>2.15.0</jackson.version>
         <jwt.version>0.9.1</jwt.version>
         <captcha.version>1.6.2</captcha.version>
+        <pinyin4j.version>2.5.1</pinyin4j.version>
+        <jetbrains.version>24.0.1</jetbrains.version>
+        <findbugs.version>3.0.1</findbugs.version>
+        <transmittable.version>2.14.2</transmittable.version>
 
     </properties>
 
@@ -110,8 +114,32 @@
             <!-- 验证码生成 -->
             <dependency>
                 <groupId>com.github.whvcse</groupId>
-                <artifactId>easy-captcha</artifactId>
+                    <artifactId>easy-captcha</artifactId>
                 <version>${captcha.version}</version>
+            </dependency>
+            <!-- 拼音 -->
+            <dependency>
+                <groupId>com.belerweb</groupId>
+                <artifactId>pinyin4j</artifactId>
+                <version>${pinyin4j.version}</version>
+            </dependency>
+            <!-- 通用注解 -->
+            <dependency>
+                <groupId>org.jetbrains</groupId>
+                <artifactId>annotations</artifactId>
+                <version>${jetbrains.version}</version>
+            </dependency>
+            <!-- 通用注解 -->
+            <dependency>
+                <groupId>com.google.code.findbugs</groupId>
+                <artifactId>annotations</artifactId>
+                <version>${findbugs.version}</version>
+            </dependency>
+            <!-- ttl 子父线程共享变量 -->
+            <dependency>
+                <groupId>com.alibaba</groupId>
+                <artifactId>transmittable-thread-local</artifactId>
+                <version>${transmittable.version}</version>
             </dependency>
 
         </dependencies>

@@ -15,12 +15,13 @@
 
     <modules>
         <module>jason-common-core</module>
-        <module>jason-common-web</module>
+        <module>jason-common-service</module>
         <module>jason-common-file</module>
         <module>jason-common-http</module>
         <module>jason-common-log</module>
         <module>jason-common-redis</module>
         <module>jason-common-database</module>
+        <module>jason-common-thread</module>
     </modules>
 
     <dependencies>

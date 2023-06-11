@@ -50,14 +50,11 @@
         <dependency>
             <groupId>com.belerweb</groupId>
             <artifactId>pinyin4j</artifactId>
-            <version>2.5.1</version>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/org.jetbrains/annotations -->
+        <!-- 通用注解 -->
         <dependency>
             <groupId>org.jetbrains</groupId>
             <artifactId>annotations</artifactId>
-            <version>24.0.1</version>
-
         </dependency>
 
     </dependencies>

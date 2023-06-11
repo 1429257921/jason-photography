@@ -9,7 +9,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>jason-common-web</artifactId>
+    <artifactId>jason-common-service</artifactId>
 
     <dependencies>
         <dependency>

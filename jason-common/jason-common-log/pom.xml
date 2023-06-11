@@ -13,16 +13,6 @@
     <description>日志模块</description>
 
     <dependencies>
-        <dependency>
-            <groupId>com.jason</groupId>
-            <artifactId>jason-common-core</artifactId>
-            <version>4.0</version>
-        </dependency>
-        <dependency>
-            <groupId>com.jason</groupId>
-            <artifactId>jason-common-web</artifactId>
-            <version>4.0</version>
-        </dependency>
 
     </dependencies>
 
