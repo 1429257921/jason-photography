@@ -25,7 +25,6 @@ import java.util.concurrent.TimeUnit;
  * @since 2023/6/12
  */
 @Slf4j
-@RequiredArgsConstructor
 @SuppressWarnings("all")
 public record OkHttpConfiguration(ConfigurableEnvironment configurableEnvironment) {
 
