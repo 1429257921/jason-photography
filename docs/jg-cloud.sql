@@ -1,7 +1,11 @@
 drop table if exists t_admin_account;
+
 drop table if exists t_admin_account_login_record;
+
 drop table if exists t_admin_permission;
+
 drop table if exists t_admin_role;
+
 drop table if exists t_admin_role_permission;
 
 /*==============================================================*/
@@ -15,7 +19,7 @@ create table t_admin_account
     password             varchar(32) not null comment '密码',
     head_portrait        varchar(255) default '' comment '头像',
     nick                 varchar(15) not null comment '昵名',
-    status               tinyint(1) unsigned default 0 comment '账号状态（0、启用，1、禁用）',
+    status               tinyint(1) unsigned default 0 comment '启用状态（0、启用，1、禁用）',
     remark               varchar(200) default '' comment '备注',
     del_flag             tinyint(1) unsigned default 0 comment '删除标志（0、正常，1、删除）',
     create_id            int(11) unsigned not null comment '创建者ID',
@@ -80,7 +84,7 @@ create table t_admin_permission
     name                 varchar(32) not null comment '权限名称',
     permission           varchar(50) not null comment '权限标识',
     sort                 int(11) unsigned default 0 comment '排序',
-    status               tinyint(1) unsigned default 0 comment '状态（0、正常，1、禁用）',
+    status               tinyint(1) unsigned default 0 comment '启用状态（0、正常，1、禁用）',
     remark               varchar(200) default '' comment '备注',
     del_flag             tinyint(1) unsigned default 0 comment '删除标志（0、正常，1、删除）',
     create_id            int(11) unsigned not null comment '创建者ID',
@@ -105,7 +109,7 @@ create table t_admin_role
     name                 varchar(32) not null comment '角色名称',
     role_flag            varchar(32) not null comment '排序',
     sort                 int(11) unsigned default 0 comment '排序',
-    status               tinyint(1) unsigned default 0 comment '状态（0、正常，1、禁用）',
+    status               tinyint(1) unsigned default 0 comment '启用状态（0、正常，1、禁用）',
     remark               varchar(200) default '' comment '备注',
     del_flag             tinyint(1) unsigned default 0 comment '删除标志（0、正常，1、删除）',
     create_id            int(11) unsigned not null comment '创建者ID',
