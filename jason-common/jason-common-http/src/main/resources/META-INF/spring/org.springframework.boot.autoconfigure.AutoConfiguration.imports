@@ -1,0 +1,2 @@
+com.jason.common.http.config.OkHttpConfiguration
+com.jason.common.http.service.OkHttpService
