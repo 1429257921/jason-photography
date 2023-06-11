@@ -1,8 +1,4 @@
 spring:
-  servlet:
-    multipart:
-      max-file-size: 2MB
-      max-request-size: 2MB
   security:
     user:
       name: xxx
@@ -17,55 +13,14 @@ spring:
       url: xxx
       username: xxx
       password: xxx
-      driver-class-name: com.mysql.cj.jdbc.Driver
-      type: com.alibaba.druid.pool.DruidDataSource
-      # 初始化大小，最小，最大
-      initialSize: 3
-      minIdle: 3
-      maxActive: 15
-      # 配置获取连接等待超时的时间
-      maxWait: 5000
-      # 配置间隔多久才进行一次检测，检测需要关闭的空闲连接，单位是毫秒
-      timeBetweenEvictionRunsMillis: 90000
-      # 配置一个连接在池中最小生存的时间，单位是毫秒
-      minEvictableIdleTimeMillis: 1800000
-      test-while-idle: true
-      test-on-borrow: true
-      test-on-return: true
-      validationQuery: SELECT 1 FROM DUAL
-      # 配置监控统计拦截的filters
-      filters: stat
-      stat-view-servlet:
-        url-pattern: /druid/*
-        reset-enable: false
-      web-stat-filter:
-        url-pattern: /*
-        exclusions: "*.js,*.gif,*.jpg,*.bmp,*.png,*.css,*.ico,/druid/*"
-
-# okhttp相关配置
-ok:
-  http:
-    # 连接超时时间(秒)
-    connect-timeout: 120
-    # 读取超时时间(秒)
-    read-timeout: 300
-    # 写入超时时间(秒)
-    write-timeout: 300
 
 rsa:
   private-key: xxx
 
 #jwt
 jwt:
-  header: token
-  # 令牌前缀
-  token-start-with: Bearer
   secret: k09BQnaF
   # 必须使用最少88位的Base64对该令牌进行编码
   base64-secret: xxx
   # 令牌过期时间 此处单位/毫秒 ，默认7天，可在此网站生成 https://www.convertworld.com/zh-hans/time/milliseconds.html
   token-validity-in-seconds: 604800000
-  # 在线用户key
-  online-key: online-token_
-  # 验证码
-  code-key: code-key_
