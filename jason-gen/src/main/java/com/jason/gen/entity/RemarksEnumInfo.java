@@ -1,6 +1,5 @@
 package com.jason.gen.entity;
 
-import cn.hutool.core.text.NamingCase;
 import cn.hutool.extra.pinyin.PinyinUtil;
 import com.baomidou.mybatisplus.generator.config.GlobalConfig;
 import com.jason.gen.constant.GenConstant;
@@ -11,7 +10,6 @@ import lombok.extern.slf4j.Slf4j;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -41,31 +39,35 @@ public class RemarksEnumInfo implements Serializable {
         remarksEnumInfo.setDate(LocalDate.now().toString());
         remarksEnumInfo.setTableName(columnInfo.getTableName());
         remarksEnumInfo.setEnumPackage(GenConstant.JASON_PHOTOGRAPHY_DAO_ENUM_PACKAGE);
-        remarksEnumInfo.setEnumFileName(GenCommonUtil.getEnumFileName(columnInfo.getTableName(),columnInfo.getColumnName()));
-
+        remarksEnumInfo.setEnumFileName(GenCommonUtil.getEnumFileName(columnInfo.getTableName(), columnInfo.getColumnName()));
         String remarks = columnInfo.getRemarks();
-        if (remarks.contains("状态") || remarks.contains("类型")) {
-            if (remarks.contains("（") && remarks.contains("）")) {
-                int indexBegin = remarks.indexOf("（");
-                int indexEnd = remarks.indexOf("）");
-                String comment = remarks.substring(0, indexBegin);
-                remarksEnumInfo.setComment(comment);
-                remarksEnumInfo.setCommentDesc(remarks.substring(indexBegin, indexEnd + 1));
-                String enumValueStr = remarks.substring(indexBegin + 1, indexEnd).trim();
-                String[] split1 = enumValueStr.split("，");
-                List<EnumValue> enumValueList = new ArrayList<>(8);
-                for (String sp1 : split1) {
-                    EnumValue enumValue = new EnumValue();
-                    String[] split2 = sp1.split("、");
-                    enumValue.setValue(Integer.valueOf(split2[0].trim()));
-                    String desc = split2[1].trim();
-                    enumValue.setDesc(desc);
-                    enumValue.setEnumName(PinyinUtil.getFirstLetter(desc, ""));
-                    enumValueList.add(enumValue);
-                }
-                remarksEnumInfo.setEnumValueList(enumValueList);
+        if (GenCommonUtil.isEnumField(remarks)) {
+            int indexBegin = remarks.indexOf("（");
+            int indexEnd = remarks.indexOf("）");
+            String comment = remarks.substring(0, indexBegin);
+            remarksEnumInfo.setComment(comment);
+            remarksEnumInfo.setCommentDesc(remarks.substring(indexBegin, indexEnd + 1));
+            String enumValueStr = remarks.substring(indexBegin + 1, indexEnd).trim();
+            String[] split1 = enumValueStr.split("，");
+            List<EnumValue> enumValueList = new ArrayList<>(8);
+            for (String sp1 : split1) {
+                EnumValue enumValue = new EnumValue();
+                String[] split2 = sp1.split("、");
+                enumValue.setValue(Integer.valueOf(split2[0].trim()));
+                String desc = split2[1].trim();
+                enumValue.setDesc(desc);
+                enumValue.setEnumName(PinyinUtil.getFirstLetter(desc, ""));
+                enumValueList.add(enumValue);
+            }
+            remarksEnumInfo.setEnumValueList(enumValueList);
+            if ("status".equals(columnInfo.getColumnName()) && "启用状态".equals(comment.trim())) {
+                remarksEnumInfo.setEnumFileName(GenCommonUtil.getEnumFileName("", columnInfo.getColumnName()));
+            }
+            if ("del_flag".equals(columnInfo.getColumnName()) && "删除标志".equals(comment.trim())) {
+                remarksEnumInfo.setEnumFileName(GenCommonUtil.getEnumFileName("", columnInfo.getColumnName()));
             }
         }
+
 
         return remarksEnumInfo;
     }

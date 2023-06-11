@@ -25,13 +25,13 @@ public enum ${enumFileName} implements IEnum<Integer> {
     ;
     @EnumValue
     @JsonValue
-    private final int value;
+    private final Integer value;
     private final String desc;
 
     public static ${enumFileName} getEnum(Integer value) {
         if (value != null) {
             for (${enumFileName} valueEnum : ${enumFileName}.values()) {
-                if (valueEnum.getValue() == value) {
+                if (valueEnum.getValue().equals(value)) {
                     return valueEnum;
                 }
             }

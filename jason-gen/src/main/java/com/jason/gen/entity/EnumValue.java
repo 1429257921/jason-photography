@@ -19,7 +19,7 @@ public class EnumValue implements Serializable {
     /**
      * 枚举值
      */
-    private int value;
+    private Integer value;
     /**
      * 枚举描述
      */

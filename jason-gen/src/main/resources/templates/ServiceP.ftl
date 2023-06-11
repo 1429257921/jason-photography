@@ -9,6 +9,6 @@ import com.jason.common.database.service.BaseService;
  * @author ${author}
  * @since ${date}
  */
-public interface ${serviceClassName}${entity}Service extends BaseService<${entity}> {
+public interface ${serviceClassName!}${entity}Service extends BaseService<${entity}> {
 
 }

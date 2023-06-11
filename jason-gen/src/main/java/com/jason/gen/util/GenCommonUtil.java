@@ -20,10 +20,8 @@ public class GenCommonUtil {
      * @return 是否枚举字段
      */
     public static boolean isEnumField(String remarks) {
-        if (remarks.contains("状态") || remarks.contains("类型")) {
-            if (remarks.contains("（") && remarks.contains("）")) {
-                return true;
-            }
+        if (remarks.contains("状态") || remarks.contains("类型")||remarks.contains("删除标志")) {
+            return remarks.contains("（") && remarks.contains("）");
         }
         return false;
     }

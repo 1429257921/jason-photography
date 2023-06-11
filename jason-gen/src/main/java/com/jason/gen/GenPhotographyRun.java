@@ -101,9 +101,9 @@ public class GenPhotographyRun {
             // 首字母大写
             customMap.put("serviceClassName", GenConstant.API.substring(0, 1).toUpperCase() + GenConstant.API.substring(1));
         } else if (GenConstant.ADMIN.equals(moduleConfig.getModule())) {
-            customMap.put("serviceClassName", GenConstant.ADMIN.substring(0, 1).toUpperCase() + GenConstant.ADMIN.substring(1));
+            customMap.put("serviceClassName", "");
         } else if (GenConstant.DAO.equals(moduleConfig.getModule())) {
-            customMap.put("serviceClassName", GenConstant.ADMIN.substring(0, 1).toUpperCase() + GenConstant.ADMIN.substring(1));
+            customMap.put("serviceClassName", "");
         } else {
             throw new Exception("类型不匹配");
         }
@@ -274,11 +274,11 @@ public class GenPhotographyRun {
         } else if (GenConstant.ADMIN.equals(moduleConfig.getModule())) {
             builder.controllerBuilder()
                     .enableFileOverride()
-                    .convertFileName((entityName -> "Admin" + entityName + ConstVal.CONTROLLER))
+                    .convertFileName((entityName -> "" + entityName + ConstVal.CONTROLLER))
                     .serviceBuilder()
                     .enableFileOverride()
-                    .convertServiceFileName((entityName -> "Admin" + entityName + ConstVal.SERVICE))
-                    .convertServiceImplFileName((entityName -> "Admin" + entityName + ConstVal.SERVICE_IMPL));
+                    .convertServiceFileName((entityName -> "" + entityName + ConstVal.SERVICE))
+                    .convertServiceImplFileName((entityName -> "" + entityName + ConstVal.SERVICE_IMPL));
         } else if (GenConstant.DAO.equals(moduleConfig.getModule())) {
             builder.entityBuilder()
                     .naming(NamingStrategy.underline_to_camel)
