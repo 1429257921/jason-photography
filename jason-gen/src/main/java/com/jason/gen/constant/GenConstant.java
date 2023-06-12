@@ -1,6 +1,8 @@
 package com.jason.gen.constant;
 
 import java.io.File;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 /**
  * 代码生成相关常量配置
@@ -10,6 +12,8 @@ import java.io.File;
  **/
 public interface GenConstant {
     String SEPARATOR = File.separator;
+    Charset CHARSET = StandardCharsets.UTF_8;
+    String CHARSETStr = StandardCharsets.UTF_8.toString();
 
     String API = "api";
     String ADMIN = "admin";

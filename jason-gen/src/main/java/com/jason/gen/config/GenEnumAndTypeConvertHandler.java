@@ -27,20 +27,22 @@ import java.util.Map;
 import java.util.Properties;
 
 /**
- * 生成列字段枚举
+ * 该类主要实现了两个功能:
+ * 1.生成数据库表字段枚举类。
+ * 2.对数据库表字段的JDBC类型与JAVA类型进行自定义映射
  *
  * @author guozhongcheng
  * @since 2023/6/9
  **/
 @Slf4j
-public class GenFieldEnumHandler implements ITypeConvertHandler {
+public class GenEnumAndTypeConvertHandler implements ITypeConvertHandler {
 
     private static final String SEPARATOR = GenConstant.SEPARATOR;
 
     private static final Properties PROPERTIES = new Properties();
 
     static {
-        InputStream inputStream = GenFieldEnumHandler.class
+        InputStream inputStream = GenEnumAndTypeConvertHandler.class
                 .getClassLoader().getResourceAsStream("type-converter.properties");
         try {
             PROPERTIES.load(IoUtil.getReader(inputStream, Charset.defaultCharset()));

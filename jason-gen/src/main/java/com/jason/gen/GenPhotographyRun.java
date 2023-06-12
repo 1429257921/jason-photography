@@ -5,7 +5,7 @@ import com.baomidou.mybatisplus.generator.AutoGenerator;
 import com.baomidou.mybatisplus.generator.config.*;
 import com.baomidou.mybatisplus.generator.config.rules.NamingStrategy;
 import com.baomidou.mybatisplus.generator.engine.FreemarkerTemplateEngine;
-import com.jason.gen.config.GenFieldEnumHandler;
+import com.jason.gen.config.GenEnumAndTypeConvertHandler;
 import com.jason.gen.constant.GenConstant;
 import com.jason.gen.entity.GenConfigData;
 
@@ -169,7 +169,7 @@ public class GenPhotographyRun {
                 GEN_CONFIG_DATA.getDbUserName(),
                 GEN_CONFIG_DATA.getDbPassWord())
                 // 自定义字段类型映射
-                .typeConvertHandler(new GenFieldEnumHandler())
+                .typeConvertHandler(new GenEnumAndTypeConvertHandler())
                 .build();
         // 构建代码生成器类
         return new AutoGenerator(dsc);
