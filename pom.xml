@@ -31,6 +31,7 @@
         <jetbrains.version>24.0.1</jetbrains.version>
         <findbugs.version>3.0.1</findbugs.version>
         <transmittable.version>2.14.2</transmittable.version>
+        <redisson.version>3.21.3</redisson.version>
 
     </properties>
 
@@ -140,6 +141,12 @@
                 <groupId>com.alibaba</groupId>
                 <artifactId>transmittable-thread-local</artifactId>
                 <version>${transmittable.version}</version>
+            </dependency>
+            <!-- Redisson -->
+            <dependency>
+                <groupId>org.redisson</groupId>
+                <artifactId>redisson-spring-boot-starter</artifactId>
+                <version>${redisson.version}</version>
             </dependency>
 
         </dependencies>
