@@ -3,16 +3,18 @@ spring:
     user:
       name: xxx
       password: xxx
-  redis:
-    host: xxx
-    port: xxx
-    password: xxx
+  data:
+    redis:
+      port: 6379
+      host: xxx
+      password: xxx
   # 数据源配置
   datasource:
     druid:
       url: xxx
       username: xxx
       password: xxx
+
 
 rsa:
   private-key: xxx
