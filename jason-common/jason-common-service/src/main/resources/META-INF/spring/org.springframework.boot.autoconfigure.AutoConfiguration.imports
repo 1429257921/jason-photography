@@ -1,2 +1,4 @@
 com.jason.common.service.handler.GlobalExceptionHandler
 com.jason.common.service.filter.GlobalHandlerFilter
+com.jason.common.service.aspect.LogAspect
+com.jason.common.service.init.InitJpApiData
