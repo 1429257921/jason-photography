@@ -4,7 +4,6 @@ import cn.hutool.core.collection.CollUtil;
 import com.google.gson.Gson;
 import com.jason.common.service.anno.JpApi;
 import com.jason.common.service.context.ContextUtil;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.web.method.HandlerMethod;
@@ -24,7 +23,6 @@ import java.util.concurrent.ConcurrentMap;
  * @since 2023/6/12
  */
 @Slf4j
-@RequiredArgsConstructor
 public record InitJpApiData(RequestMappingHandlerMapping requestMappingHandlerMapping) implements CommandLineRunner {
 
     private static final ConcurrentMap<String, String> STATIC_MAP = new ConcurrentHashMap<>(256);

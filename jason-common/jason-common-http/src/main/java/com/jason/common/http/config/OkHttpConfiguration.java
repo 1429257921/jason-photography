@@ -1,6 +1,5 @@
 package com.jason.common.http.config;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.ConnectionPool;
 import okhttp3.OkHttpClient;
@@ -15,7 +14,6 @@ import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
-import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -31,39 +29,34 @@ public record OkHttpConfiguration(ConfigurableEnvironment configurableEnvironmen
     /**
      * 连接超时时间(秒)
      */
-    private static long connectTimeout = 60;
+    private static final long connectTimeout = 60;
     /**
      * 读取超时时间(秒)
      */
-    private static long readTimeout = 60;
+    private static final long readTimeout = 60;
     /**
      * 写入超时时间(秒)
      */
-    private static long writeTimeout = 60;
+    private static final long writeTimeout = 60;
     /**
      * 连接池中整体的空闲连接的最大数量
      */
-    private static int maxIdleConnections = 100;
+    private static final int maxIdleConnections = 100;
     /**
      * 连接空闲时间最多为 300 秒
      */
-    private static long keepaliveDuration = 250L;
+    private static final long keepaliveDuration = 250L;
 
     @Bean
     public OkHttpClient okHttpClient() {
-        connectTimeout = Long.parseLong(Objects.requireNonNull(configurableEnvironment.getProperty("ok.http.connect-timeout")));
-        readTimeout = Long.parseLong(Objects.requireNonNull(configurableEnvironment.getProperty("ok.http.read-timeout")));
-        writeTimeout = Long.parseLong(Objects.requireNonNull(configurableEnvironment.getProperty("ok.http.write-timeout")));
-        log.info("okHttpConfiguration配置信息connectTimeout->{},readTimeout->{},writeTimeout->{}",
-                connectTimeout, readTimeout, writeTimeout);
         OkHttpClient okHttpClient = new OkHttpClient.Builder()
                 .sslSocketFactory(sslSocketFactory(), x509TrustManager())
                 // 是否开启缓存
                 .retryOnConnectionFailure(false)
                 .connectionPool(pool())
-                .connectTimeout(connectTimeout, TimeUnit.SECONDS)
-                .readTimeout(readTimeout, TimeUnit.SECONDS)
-                .writeTimeout(writeTimeout, TimeUnit.SECONDS)
+                .connectTimeout(configurableEnvironment.getProperty("ok.http.connect-timeout", Long.class, connectTimeout), TimeUnit.SECONDS)
+                .readTimeout(configurableEnvironment.getProperty("ok.http.read-timeout", Long.class, readTimeout), TimeUnit.SECONDS)
+                .writeTimeout(configurableEnvironment.getProperty("ok.http.write-timeout", Long.class, writeTimeout), TimeUnit.SECONDS)
                 .hostnameVerifier((hostname, session) -> true)
                 // 设置代理
 //            	.proxy(new Proxy(Proxy.Type.HTTP, new InetSocketAddress("127.0.0.1", 8888)))
@@ -106,11 +99,9 @@ public record OkHttpConfiguration(ConfigurableEnvironment configurableEnvironmen
 
     @Bean
     public ConnectionPool pool() {
-        maxIdleConnections = Integer.parseInt(Objects.requireNonNull(configurableEnvironment.getProperty("ok.http.max-idle-connections")));
-        keepaliveDuration = Long.parseLong(Objects.requireNonNull(configurableEnvironment.getProperty("ok.http.keep-alive-duration")));
         return new ConnectionPool(
-                maxIdleConnections,
-                keepaliveDuration,
+                configurableEnvironment.getProperty("ok.http.max-idle-connections", Integer.class, maxIdleConnections),
+                configurableEnvironment.getProperty("ok.http.keep-alive-duration", Long.class, keepaliveDuration),
                 TimeUnit.SECONDS);
     }
 }

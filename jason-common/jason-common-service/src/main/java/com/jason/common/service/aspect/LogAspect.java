@@ -14,7 +14,6 @@ import com.jason.common.service.enums.CommonLogTypeEnum;
 import com.jason.common.service.exception.Assert;
 import com.jason.common.service.init.InitJpApiData;
 import com.jason.common.service.service.ComLogService;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -30,7 +29,6 @@ import org.aspectj.lang.reflect.MethodSignature;
 @Slf4j
 @Aspect
 @SuppressWarnings("unused")
-@RequiredArgsConstructor
 public record LogAspect(ComLogService comLogService) {
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
