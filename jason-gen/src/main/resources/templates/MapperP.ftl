@@ -1,14 +1,14 @@
-package ${package.Mapper};
+package ${packageMapper};
 
 import com.jason.common.database.mapper.CoreMapper;
-import ${package.Entity}.${entity};
+import ${packageEntity}.${entity};
 
 /**
- * ${table.comment!}${table.name}表持久层接口
+ * ${tableComment!}${tableName}表持久层接口
  *
  * @author ${author}
  * @since ${date}
  */
-public interface ${table.mapperName} extends CoreMapper<${entity}> {
+public interface ${entity}Mapper extends CoreMapper<${entity}> {
 
 }

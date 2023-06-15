@@ -1,6 +1,7 @@
 package com.jason.gen.v2;
 
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.util.ReflectUtil;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import org.jetbrains.annotations.NotNull;
@@ -20,6 +21,13 @@ import java.util.concurrent.ConcurrentMap;
  **/
 public class FtlTemplateEngineImpl implements TemplateEngine {
 
+
+    /**
+     * 构建需要
+     * @param genArgs 生成器配置参数对象
+     * @return
+     * @throws Exception
+     */
     @Override
     public List<TemplateDefinition> loadTemplates(@NotNull GenArgs genArgs) throws Exception {
         List<TemplateDefinition> templateDefinitionList = new ArrayList<>(32);
@@ -29,18 +37,17 @@ public class FtlTemplateEngineImpl implements TemplateEngine {
             for (TemplateFileNameEnum templateFileNameEnum : TemplateFileNameEnum.values()) {
                 String templateFileName = templateFileNameEnum.name();
                 String tfn = "gen" + templateFileName.substring(0, templateFileName.length() - 1);
-                for (Field field : serviceGenConfig.getClass().getDeclaredFields()) {
-                    field.setAccessible(true);
+                Field[] fieldArr = ReflectUtil.getFields(serviceGenConfig.getClass(), field -> !field.getName().contains("Path"));
+                for (Field field : fieldArr) {
+//                    field.setAccessible(true);
                     String fieldName = field.getName();
-                    Object fieldValue = field.get(serviceGenConfig);
-                    if (fieldName.equals(tfn) && Boolean.TRUE.equals(fieldValue)) {
+                    if (fieldName.equals(tfn) && Boolean.TRUE.equals(field.get(serviceGenConfig))) {
                         String templatePath = genArgs.getProjectPath() + Constant.SEPARATOR + Constant.JASON_GEN_TEMPLATES_PATH;
                         TemplateDefinition templateDefinition = new TemplateDefinition();
                         templateDefinition.setTemplateFileName(templateFileName + ".ftl");
                         templateDefinition.setBaseTemplateFilePath(templatePath);
-                        Field declaredField = serviceGenConfig.getClass().getDeclaredField(fieldName + "Path");
-                        declaredField.setAccessible(true);
-                        templateDefinition.setBaseOutputFilePath((String) declaredField.get(serviceGenConfig));
+                        Object baseOutputFilePath = ReflectUtil.getFieldValue(serviceGenConfig, fieldName + "Path");
+                        templateDefinition.setBaseOutputFilePath((String) baseOutputFilePath);
                         templateDefinitionList.add(templateDefinition);
                     }
                 }
@@ -59,8 +66,8 @@ public class FtlTemplateEngineImpl implements TemplateEngine {
      */
     @Override
     public void populateTemplateDefinition(@NotNull List<TemplateDefinition> templateDefinitionList,
-                                           ConcurrentMap<String, TableDefinition> tableDefinitionMap,
-                                           ConcurrentMap<String, TypeConvertDefinition> typeConvertMap) throws Exception {
+                                           @NotNull ConcurrentMap<String, TableDefinition> tableDefinitionMap,
+                                           @NotNull ConcurrentMap<String, TypeConvertDefinition> typeConvertMap) throws Exception {
         for (TemplateDefinition templateDefinition : templateDefinitionList) {
             // 对文件生成位置的填充
         }

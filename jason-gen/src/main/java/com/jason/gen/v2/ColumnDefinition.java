@@ -13,6 +13,10 @@ import java.io.Serializable;
 @Data
 public class ColumnDefinition implements Serializable {
     /**
+     * 主键标识
+     */
+    private Boolean keyFlag;
+    /**
      * 列名称
      */
     private String columnName;
@@ -36,6 +40,10 @@ public class ColumnDefinition implements Serializable {
      * jdbc类型名称
      */
     private String jdbcTypeName;
+    /**
+     * java属性名称
+     */
+    private String javaFieldName;
     /**
      * java类型名称
      */

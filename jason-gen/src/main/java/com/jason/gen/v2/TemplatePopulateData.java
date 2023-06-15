@@ -2,6 +2,8 @@ package com.jason.gen.v2;
 
 import lombok.Data;
 
+import java.util.List;
+
 /**
  * TODO
  *
@@ -21,5 +23,16 @@ public class TemplatePopulateData extends TableDefinition {
     private String packageMapperXml;
     private String packageEnum;
 
+    private String controllerClassName;
+    private String serviceClassName;
+    private String serviceImplClassName;
+    private String entityClassName;
+    private String mapperClassName;
+    private String mapperXmlClassName;
+    private String enumClassName;
 
+    private String tableName;
+    private String tableComment;
+
+    private List<ColumnDefinition> columnDefinitionList;
 }

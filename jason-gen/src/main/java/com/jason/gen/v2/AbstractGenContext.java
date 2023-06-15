@@ -9,6 +9,7 @@ import cn.hutool.json.JSONUtil;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -54,14 +55,16 @@ public abstract class AbstractGenContext {
      * K - 保存表名
      * V - 保存了表名、表注释和列相关信息
      */
-    protected final ConcurrentMap<String, TableDefinition> tableDefinitionMap = new ConcurrentHashMap<>(256);
+    protected final ConcurrentMap<String, TableDefinition> tableDefinitionMap = new ConcurrentHashMap<>(16);
     /**
      * K - 数据库字段类型名
      * V - Java类型定义
      */
     protected final ConcurrentMap<String, TypeConvertDefinition> typeConvertMap = new ConcurrentHashMap<>(32);
-
-    protected List<TemplateDefinition> templateDefinitionList;
+    /**
+     * 模板定义信息集合
+     */
+    protected final List<TemplateDefinition> templateDefinitionList = new ArrayList<>(16);
 
     public void build() throws Exception {
         // 准备构建
@@ -80,8 +83,11 @@ public abstract class AbstractGenContext {
         populateColumnTypeConverter();
         System.out.println(JSONUtil.toJsonPrettyStr(this.tableDefinitionMap));
 
-        // 加载模板文件
+        // 加载模板定义信息
         loadTemplates(genArgs);
+
+        // 构建输出文件定义信息
+        buildOutputFileDefinition();
 
         // 填充模板定义参数
         populateTemplateDefinition();
@@ -94,6 +100,25 @@ public abstract class AbstractGenContext {
 
         // 执行代码生成
         executeCodeGeneration();
+    }
+
+    /**
+     * 核心
+     */
+    protected void buildOutputFileDefinition() {
+        OutputFileDefinition definition = new OutputFileDefinition();
+        // 获取需要生成代码的表名称
+        GenArgs.ConvertData convertData = this.genArgs.getConvertData();
+        for (String tableName : convertData.getTableList()) {
+            TableDefinition tableDefinition = this.tableDefinitionMap.get(tableName);
+            for (ColumnDefinition columnDefinition : tableDefinition.getColumnDefinitionsList()) {
+                TypeConvertDefinition typeConvertDefinition = this.typeConvertMap.get(columnDefinition.getColumnName());
+                if (columnDefinition.getJdbcTypeName().equalsIgnoreCase(typeConvertDefinition.getJdbcTypeName())) {
+
+                }
+            }
+        }
+
     }
 
     private void lastAdjustment() {
@@ -116,7 +141,7 @@ public abstract class AbstractGenContext {
     }
 
     protected void loadTemplates(GenArgs genArgs) throws Exception {
-        this.templateDefinitionList = templateEngine.loadTemplates(genArgs);
+        this.templateDefinitionList.addAll(templateEngine.loadTemplates(genArgs));
         if (CollUtil.isEmpty(this.templateDefinitionList)) {
             throw new Exception("未加载模板文件");
         }
@@ -222,7 +247,7 @@ public abstract class AbstractGenContext {
             if (spiltIndex == -1) {
                 throw new Exception("类型映射参数Value值格式错误，获取的格式->" + value + "，期望的格式->java.lang.String");
             }
-            String javaTypeName = value.substring(spiltIndex, value.length() - 1);
+            String javaTypeName = value.substring(spiltIndex + 1);
             if (StrUtil.isNotBlank(javaTypeName)) {
                 typeConvertDefinition.setJdbcTypeName(key);
                 typeConvertDefinition.setJavaTypeName(javaTypeName);

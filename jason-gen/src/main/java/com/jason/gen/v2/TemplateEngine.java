@@ -12,6 +12,8 @@ import java.util.concurrent.ConcurrentMap;
  * @since 2023/6/14
  **/
 public interface TemplateEngine {
+
+
     /**
      * 加载模板文件
      *

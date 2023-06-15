@@ -14,7 +14,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 /**
- * TODO
+ * 生成器参数配置
  *
  * @author guozhongcheng
  * @since 2023/6/13
@@ -42,18 +42,18 @@ public class GenArgs implements Serializable {
     @Data
     public static class ConvertData {
         /**
-         *
+         * 表名数组
          */
         private final List<String> tableList = new ArrayList<>(16);
         /**
-         *
+         * 模块名数组
          */
         private final List<String> moduleList = new ArrayList<>(16);
         /**
-         *
+         * k - 服务名枚举
+         * v - 服务生成配置
          */
         private final ConcurrentMap<ServiceNameEnum, ServiceGenConfig> serviceGenConfigMap = new ConcurrentHashMap<>(16);
-
     }
 
     /**
@@ -105,35 +105,40 @@ public class GenArgs implements Serializable {
      */
     private void populateGenFilePath(ServiceNameEnum serviceNameEnum, ServiceGenConfig serviceGenConfig) {
         if (Constant.Api.SERVICE_NAME == serviceNameEnum) {
-            serviceGenConfig.setGenControllerPath(this.projectPath + Constant.SEPARATOR + Constant.Api.FULL_CONTROLLER_PACKAGE);
-            serviceGenConfig.setGenServicePath(this.projectPath + Constant.SEPARATOR + Constant.Api.FULL_SERVICE_PACKAGE);
-            serviceGenConfig.setGenServiceImplPath(this.projectPath + Constant.SEPARATOR + Constant.Api.FULL_SERVICE_IMPL_PACKAGE);
-            serviceGenConfig.setGenEntityPath(this.projectPath + Constant.SEPARATOR + Constant.Api.FULL_ENTITY_PACKAGE);
-            serviceGenConfig.setGenMapperPath(this.projectPath + Constant.SEPARATOR + Constant.Api.FULL_MAPPER_PACKAGE);
-            serviceGenConfig.setGenMapperXmlPath(this.projectPath + Constant.SEPARATOR + Constant.Api.FULL_MAPPER_XML_PACKAGE);
-            serviceGenConfig.setGenEnumPath(this.projectPath + Constant.SEPARATOR + Constant.Api.FULL_ENUM_PACKAGE);
+            serviceGenConfig.setGenControllerPath(serviceGenConfig.getGenController() ? this.projectPath + Constant.SEPARATOR + Constant.Api.FULL_CONTROLLER_PACKAGE : null);
+            serviceGenConfig.setGenServicePath(serviceGenConfig.getGenService() ? this.projectPath + Constant.SEPARATOR + Constant.Api.FULL_SERVICE_PACKAGE : null);
+            serviceGenConfig.setGenServiceImplPath(serviceGenConfig.getGenServiceImpl() ? this.projectPath + Constant.SEPARATOR + Constant.Api.FULL_SERVICE_IMPL_PACKAGE : null);
+            serviceGenConfig.setGenEntityPath(serviceGenConfig.getGenEntity() ? this.projectPath + Constant.SEPARATOR + Constant.Api.FULL_ENTITY_PACKAGE : null);
+            serviceGenConfig.setGenMapperPath(serviceGenConfig.getGenMapper() ? this.projectPath + Constant.SEPARATOR + Constant.Api.FULL_MAPPER_PACKAGE : null);
+            serviceGenConfig.setGenMapperXmlPath(serviceGenConfig.getGenMapperXml() ? this.projectPath + Constant.SEPARATOR + Constant.Api.FULL_MAPPER_XML_PACKAGE : null);
+            serviceGenConfig.setGenEnumPath(serviceGenConfig.getGenEnum() ? this.projectPath + Constant.SEPARATOR + Constant.Api.FULL_ENUM_PACKAGE : null);
         } else if (Constant.Admin.SERVICE_NAME == serviceNameEnum) {
-            serviceGenConfig.setGenControllerPath(this.projectPath + Constant.SEPARATOR + Constant.Admin.FULL_CONTROLLER_PACKAGE);
-            serviceGenConfig.setGenServicePath(this.projectPath + Constant.SEPARATOR + Constant.Admin.FULL_SERVICE_PACKAGE);
-            serviceGenConfig.setGenServiceImplPath(this.projectPath + Constant.SEPARATOR + Constant.Admin.FULL_SERVICE_IMPL_PACKAGE);
-            serviceGenConfig.setGenEntityPath(this.projectPath + Constant.SEPARATOR + Constant.Admin.FULL_ENTITY_PACKAGE);
-            serviceGenConfig.setGenMapperPath(this.projectPath + Constant.SEPARATOR + Constant.Admin.FULL_MAPPER_PACKAGE);
-            serviceGenConfig.setGenMapperXmlPath(this.projectPath + Constant.SEPARATOR + Constant.Admin.FULL_MAPPER_XML_PACKAGE);
-            serviceGenConfig.setGenEnumPath(this.projectPath + Constant.SEPARATOR + Constant.Admin.FULL_ENUM_PACKAGE);
+            serviceGenConfig.setGenControllerPath(serviceGenConfig.getGenController() ? this.projectPath + Constant.SEPARATOR + Constant.Admin.FULL_CONTROLLER_PACKAGE : null);
+            serviceGenConfig.setGenServicePath(serviceGenConfig.getGenService() ? this.projectPath + Constant.SEPARATOR + Constant.Admin.FULL_SERVICE_PACKAGE : null);
+            serviceGenConfig.setGenServiceImplPath(serviceGenConfig.getGenServiceImpl() ? this.projectPath + Constant.SEPARATOR + Constant.Admin.FULL_SERVICE_IMPL_PACKAGE : null);
+            serviceGenConfig.setGenEntityPath(serviceGenConfig.getGenEntity() ? this.projectPath + Constant.SEPARATOR + Constant.Admin.FULL_ENTITY_PACKAGE : null);
+            serviceGenConfig.setGenMapperPath(serviceGenConfig.getGenMapper() ? this.projectPath + Constant.SEPARATOR + Constant.Admin.FULL_MAPPER_PACKAGE : null);
+            serviceGenConfig.setGenMapperXmlPath(serviceGenConfig.getGenMapperXml() ? this.projectPath + Constant.SEPARATOR + Constant.Admin.FULL_MAPPER_XML_PACKAGE : null);
+            serviceGenConfig.setGenEnumPath(serviceGenConfig.getGenEnum() ? this.projectPath + Constant.SEPARATOR + Constant.Admin.FULL_ENUM_PACKAGE : null);
         } else if (Constant.Dao.SERVICE_NAME == serviceNameEnum) {
-            serviceGenConfig.setGenControllerPath(this.projectPath + Constant.SEPARATOR + Constant.Dao.FULL_CONTROLLER_PACKAGE);
-            serviceGenConfig.setGenServicePath(this.projectPath + Constant.SEPARATOR + Constant.Dao.FULL_SERVICE_PACKAGE);
-            serviceGenConfig.setGenServiceImplPath(this.projectPath + Constant.SEPARATOR + Constant.Dao.FULL_SERVICE_IMPL_PACKAGE);
-            serviceGenConfig.setGenEntityPath(this.projectPath + Constant.SEPARATOR + Constant.Dao.FULL_ENTITY_PACKAGE);
-            serviceGenConfig.setGenMapperPath(this.projectPath + Constant.SEPARATOR + Constant.Dao.FULL_MAPPER_PACKAGE);
-            serviceGenConfig.setGenMapperXmlPath(this.projectPath + Constant.SEPARATOR + Constant.Dao.FULL_MAPPER_XML_PACKAGE);
-            serviceGenConfig.setGenEnumPath(this.projectPath + Constant.SEPARATOR + Constant.Dao.FULL_ENUM_PACKAGE);
+            serviceGenConfig.setGenControllerPath(serviceGenConfig.getGenController() ? this.projectPath + Constant.SEPARATOR + Constant.Dao.FULL_CONTROLLER_PACKAGE : null);
+            serviceGenConfig.setGenServicePath(serviceGenConfig.getGenService() ? this.projectPath + Constant.SEPARATOR + Constant.Dao.FULL_SERVICE_PACKAGE : null);
+            serviceGenConfig.setGenServiceImplPath(serviceGenConfig.getGenServiceImpl() ? this.projectPath + Constant.SEPARATOR + Constant.Dao.FULL_SERVICE_IMPL_PACKAGE : null);
+            serviceGenConfig.setGenEntityPath(serviceGenConfig.getGenEntity() ? this.projectPath + Constant.SEPARATOR + Constant.Dao.FULL_ENTITY_PACKAGE : null);
+            serviceGenConfig.setGenMapperPath(serviceGenConfig.getGenMapper() ? this.projectPath + Constant.SEPARATOR + Constant.Dao.FULL_MAPPER_PACKAGE : null);
+            serviceGenConfig.setGenMapperXmlPath(serviceGenConfig.getGenMapperXml() ? this.projectPath + Constant.SEPARATOR + Constant.Dao.FULL_MAPPER_XML_PACKAGE : null);
+            serviceGenConfig.setGenEnumPath(serviceGenConfig.getGenEnum() ? this.projectPath + Constant.SEPARATOR + Constant.Dao.FULL_ENUM_PACKAGE : null);
         } else {
             System.out.println("类型未找到");
         }
     }
 
-
+    /**
+     * 获取服务生成配置对象
+     *
+     * @param module 模块名
+     * @return 服务生成配置对象
+     */
     private ServiceGenConfig getServiceGenConfig(String module) {
         return ServiceGenConfig.builder()
                 .genController(isContain(module, this.genController))
@@ -146,7 +151,13 @@ public class GenArgs implements Serializable {
                 .build();
     }
 
-
+    /**
+     * 根据逗号作为分割符，将字符串拆分成List集合
+     *
+     * @param param 带逗号的字符串
+     * @return 拆分后的List集合
+     * @throws Exception 拆分后List集合为空抛出异常
+     */
     private static List<String> convertList(String param) throws Exception {
         String[] tableArr = param.split(StrPool.COMMA);
         if (ArrayUtil.isEmpty(tableArr)) {
@@ -157,6 +168,13 @@ public class GenArgs implements Serializable {
         return list;
     }
 
+    /**
+     * 将params按照逗号拆分成数组，遍历数组全量匹配param
+     *
+     * @param param  需要匹配的字符串
+     * @param params 匹配的字符串
+     * @return 是否匹配上
+     */
     private static boolean isContain(String param, String params) {
         if (StrUtil.isNotBlank(param) && StrUtil.isNotBlank(params)) {
             String[] split = params.split(StrPool.COMMA);

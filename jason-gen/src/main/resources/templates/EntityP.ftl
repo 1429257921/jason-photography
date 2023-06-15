@@ -1,7 +1,7 @@
 package ${packageEntity};
 
 import com.baomidou.mybatisplus.annotation.*;
-<#list tableDefinition.columnDefinitionsList as field>
+<#list columnDefinitionList as field>
 <#if field.columnName ? contains("status") || field.columnName ? contains("type")>
 	<#if field.columnComment ? contains("状态") || field.columnComment ? contains("类型")>
 	    <#if field.columnComment ? contains("（") && field.columnComment ? contains("）")>
@@ -14,7 +14,7 @@ import lombok.*;
 
 import java.io.Serial;
 import java.io.Serializable;
-<#list tableDefinition.columnDefinitionsList as field>
+<#list columnDefinitionList as field>
     <#if field.javaTypeName = "BigDecimal">
 import java.math.BigDecimal;
 	<#elseif field.javaTypeName = "LocalDateTime">
@@ -45,52 +45,34 @@ public class ${outputFileName} implements Serializable {
     private static final long serialVersionUID = 1L;
 
 <#-- ----------  BEGIN 字段循环遍历  ---------->
-<#list tableDefinition.columnDefinitionsList as field>
-	<#--/**
-	* field.propertyName -> ${field.propertyName}
-	* field.annotationColumnName -> ${field.annotationColumnName}
-	* field.propertyType -> ${field.propertyType}
-	* field.keyFlag -> ${field.keyFlag?string('true', 'false')}
-	* field.name -> ${field.name}
-	* field.fill -> ${field.fill???string('true', 'false')}
-	* field.convertData -> ${field.convertData?string('true', 'false')}
-	* field.keyIdentityFlag -> ${field.keyIdentityFlag?string('true', 'false')}
-	*/-->
+<#list columnDefinitionList as field>
 	/**
 	 * ${field.columnComment}
 	 */
     <#if field.keyFlag>
     <#-- 主键 -->
-        <#if field.keyIdentityFlag>
-			<#if field.annotationColumnName == field.propertyName>
-	@TableId(type = IdType.AUTO)
-	        <#else>
-	@TableId(value = "${field.annotationColumnName}", type = IdType.AUTO)
-	        </#if>
-        </#if>
+	@TableId(value = "${field.columnName}", type = IdType.AUTO)
 	<#-- 普通属性 -->
-	<#elseif field.annotationColumnName != field.name>
-	@TableField("${field.annotationColumnName}")
 	<#else>
-	    <#if field.annotationColumnName == "create_time">
+	    <#if field.columnName == "create_time">
 	@TableField(fill = FieldFill.INSERT)
-	    <#elseif field.annotationColumnName == "update_time">
+	    <#elseif field.columnName == "update_time">
 	@TableField(fill = FieldFill.INSERT_UPDATE, updateStrategy = FieldStrategy.NOT_EMPTY)
 	    </#if>
     </#if>
-<#-- 启用状态 -->
-    <#if field.annotationColumnName == "status">
-	private ${field.propertyType} status = ${field.propertyType}.qy0;
+	<#-- 启用状态 -->
+    <#if field.columnName == "status">
+	private ${field.javaTypeName} status = ${field.javaTypeName}.qy0;
         <#continue>
     </#if>
     <#-- 逻辑删除注解 -->
-    <#if field.annotationColumnName == "del_flag">
-	@TableField("${field.annotationColumnName}")
+    <#if field.columnName == "del_flag">
+	@TableField("${field.columnName}")
 	@TableLogic
-	private ${field.propertyType} deleted = ${field.propertyType}.zc0;
+	private ${field.javaTypeName} deleted = ${field.javaTypeName}.zc0;
 		<#continue>
     </#if>
-	private ${field.propertyType} ${field.propertyName};
+	private ${field.javaTypeName} ${field.javaFieldName};
 </#list>
 <#------------  END 字段循环遍历  ---------->
 }
