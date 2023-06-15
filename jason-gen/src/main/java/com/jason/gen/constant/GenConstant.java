@@ -37,4 +37,6 @@ public interface GenConstant {
     String JASON_PHOTOGRAPHY_ADMIN_PACKAGE = "com.jason.photography.admin";
 
     String JASON_GEN_TEMPLATES_PATH = "jason-gen" + SEPARATOR + RESOURCES_PATH + SEPARATOR + "templates";
+
+
 }

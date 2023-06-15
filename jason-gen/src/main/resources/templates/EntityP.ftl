@@ -1,10 +1,10 @@
-package ${package.Entity};
+package ${packageEntity};
 
 import com.baomidou.mybatisplus.annotation.*;
-<#list table.fields as field>
-<#if field.annotationColumnName ? contains("status") || field.annotationColumnName ? contains("type")>
-	<#if field.comment ? contains("状态") || field.comment ? contains("类型")>
-	    <#if field.comment ? contains("（") && field.comment ? contains("）")>
+<#list tableDefinition.columnDefinitionsList as field>
+<#if field.columnName ? contains("status") || field.columnName ? contains("type")>
+	<#if field.columnComment ? contains("状态") || field.columnComment ? contains("类型")>
+	    <#if field.columnComment ? contains("（") && field.columnComment ? contains("）")>
 import com.jason.photography.dao.enums.db.*;
 	    </#if>
 	</#if>
@@ -14,19 +14,19 @@ import lombok.*;
 
 import java.io.Serial;
 import java.io.Serializable;
-<#list table.fields as field>
-    <#if field.propertyType = "BigDecimal">
+<#list tableDefinition.columnDefinitionsList as field>
+    <#if field.javaTypeName = "BigDecimal">
 import java.math.BigDecimal;
-	<#elseif field.propertyType = "LocalDateTime">
+	<#elseif field.javaTypeName = "LocalDateTime">
 import java.time.LocalDateTime;
-	<#elseif field.propertyType = "LocalDate">
+	<#elseif field.javaTypeName = "LocalDate">
 import java.time.LocalDate;
     </#if>
 </#list>
 
 /**
  * <p>
- * ${table.comment!}
+ * ${tableName!}
  * </p>
  *
  * @author ${author}
@@ -38,14 +38,14 @@ import java.time.LocalDate;
 @Builder
 @ToString
 @EqualsAndHashCode(callSuper = false)
-@TableName("${table.name}")
-public class ${entity} implements Serializable {
+@TableName("${tableName}")
+public class ${outputFileName} implements Serializable {
 
 	@Serial
     private static final long serialVersionUID = 1L;
 
 <#-- ----------  BEGIN 字段循环遍历  ---------->
-<#list table.fields as field>
+<#list tableDefinition.columnDefinitionsList as field>
 	<#--/**
 	* field.propertyName -> ${field.propertyName}
 	* field.annotationColumnName -> ${field.annotationColumnName}
@@ -53,11 +53,11 @@ public class ${entity} implements Serializable {
 	* field.keyFlag -> ${field.keyFlag?string('true', 'false')}
 	* field.name -> ${field.name}
 	* field.fill -> ${field.fill???string('true', 'false')}
-	* field.convert -> ${field.convert?string('true', 'false')}
+	* field.convertData -> ${field.convertData?string('true', 'false')}
 	* field.keyIdentityFlag -> ${field.keyIdentityFlag?string('true', 'false')}
 	*/-->
 	/**
-	 * ${field.comment}
+	 * ${field.columnComment}
 	 */
     <#if field.keyFlag>
     <#-- 主键 -->
