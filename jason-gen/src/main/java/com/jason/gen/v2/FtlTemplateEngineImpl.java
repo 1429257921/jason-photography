@@ -1,14 +1,12 @@
 package com.jason.gen.v2;
 
 import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.util.ReflectUtil;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.BufferedWriter;
 import java.io.File;
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentMap;
@@ -24,6 +22,7 @@ public class FtlTemplateEngineImpl implements TemplateEngine {
 
     /**
      * 构建需要
+     *
      * @param genArgs 生成器配置参数对象
      * @return
      * @throws Exception
@@ -31,27 +30,18 @@ public class FtlTemplateEngineImpl implements TemplateEngine {
     @Override
     public List<TemplateDefinition> loadTemplates(@NotNull GenArgs genArgs) throws Exception {
         List<TemplateDefinition> templateDefinitionList = new ArrayList<>(32);
-        ConcurrentMap<ServiceNameEnum, ServiceGenConfig> serviceGenConfigMap = genArgs.getConvertData().getServiceGenConfigMap();
-        for (ServiceNameEnum serviceNameEnum : serviceGenConfigMap.keySet()) {
-            ServiceGenConfig serviceGenConfig = serviceGenConfigMap.get(serviceNameEnum);
-            for (TemplateFileNameEnum templateFileNameEnum : TemplateFileNameEnum.values()) {
-                String templateFileName = templateFileNameEnum.name();
-                String tfn = "gen" + templateFileName.substring(0, templateFileName.length() - 1);
-                Field[] fieldArr = ReflectUtil.getFields(serviceGenConfig.getClass(), field -> !field.getName().contains("Path"));
-                for (Field field : fieldArr) {
-//                    field.setAccessible(true);
-                    String fieldName = field.getName();
-                    if (fieldName.equals(tfn) && Boolean.TRUE.equals(field.get(serviceGenConfig))) {
-                        String templatePath = genArgs.getProjectPath() + Constant.SEPARATOR + Constant.JASON_GEN_TEMPLATES_PATH;
-                        TemplateDefinition templateDefinition = new TemplateDefinition();
-                        templateDefinition.setTemplateFileName(templateFileName + ".ftl");
-                        templateDefinition.setBaseTemplateFilePath(templatePath);
-                        Object baseOutputFilePath = ReflectUtil.getFieldValue(serviceGenConfig, fieldName + "Path");
-                        templateDefinition.setBaseOutputFilePath((String) baseOutputFilePath);
-                        templateDefinitionList.add(templateDefinition);
-                    }
-                }
+        String templatePath = genArgs.getProjectPath() + Constant.SEPARATOR + Constant.JASON_GEN_TEMPLATES_PATH;
+        for (TemplateFileNameEnum templateFileNameEnum : TemplateFileNameEnum.values()) {
+            TemplateDefinition definition = new TemplateDefinition();
+            String templateFileName = templateFileNameEnum.name();
+            String fullTemplateFileName = templateFileNameEnum.name() + ".ftl";
+            definition.setTemplateFileName(templateFileName);
+            definition.setFullTemplateFileName(fullTemplateFileName);
+            definition.setBaseTemplateFilePath(templatePath);
+            if (!FileUtil.exist(templatePath + Constant.SEPARATOR + fullTemplateFileName)) {
+                throw new Exception("模板文件【" + fullTemplateFileName + "】在目录：" + templatePath + " 下未找到！");
             }
+            templateDefinitionList.add(definition);
         }
         return templateDefinitionList;
     }

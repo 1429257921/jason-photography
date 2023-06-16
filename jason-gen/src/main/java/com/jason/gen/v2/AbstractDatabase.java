@@ -15,7 +15,13 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 /**
- * TODO
+ * 公共抽象数据库引擎
+ * 主要职责：
+ * 1、加载驱动，通过Class.forName(driverClassName)去加载。
+ * 2、获取连接通道，通过DriverManager.getConnection()去获取。
+ * 3、加载表DDL信息，Mysql中可通过执行SHOW CREATE TABLE + 表名去查询。
+ * 4、加载表定义信息，填充tableDefinitionMap.TableDefinition对象
+ * 5、加载列定义信息，填充tableDefinitionMap.TableDefinition.columnDefinitionsList对象
  *
  * @author guozhongcheng
  * @since 2023/6/13
@@ -24,7 +30,9 @@ public abstract class AbstractDatabase {
 
     protected Connection connection;
 
-    protected ConcurrentMap<String, TableDefinition> tableDefinitionMap = new ConcurrentHashMap<>(128);
+    protected ConcurrentMap<String, String> tableCreateMap = new ConcurrentHashMap<>(16);
+
+    protected ConcurrentMap<String, TableDefinition> tableDefinitionMap = new ConcurrentHashMap<>(16);
 
     public ConcurrentMap<String, TableDefinition> init(GenArgs genArgs) throws Exception {
         // 校验驱动类是否存在
@@ -34,10 +42,12 @@ public abstract class AbstractDatabase {
         try {
             GenArgs.ConvertData convertData = genArgs.getConvertData();
             for (String tableName : convertData.getTableList()) {
+                // 加载表创建信息(DDL文本)
+                loadTableCreateSqlText(tableName, connection, tableCreateMap);
                 // 获取表定义
-                this.getTableDefinition(tableName, this.tableDefinitionMap);
+                this.getTableDefinition(tableName, this.tableDefinitionMap, this.tableCreateMap);
                 // 获取列定义
-                this.getColumnDefinition(tableName, this.tableDefinitionMap);
+                this.getColumnDefinition(tableName, this.tableDefinitionMap, this.tableCreateMap);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -47,7 +57,13 @@ public abstract class AbstractDatabase {
         return this.tableDefinitionMap;
     }
 
-    protected void getTableDefinition(String tableName, ConcurrentMap<String, TableDefinition> tableDefinitionMap) throws Exception {
+    protected void loadTableCreateSqlText(String tableName, Connection connection, ConcurrentMap<String, String> tableCreateMap) throws SQLException {
+        // 如需使用请重写
+    }
+
+    protected void getTableDefinition(String tableName,
+                                      ConcurrentMap<String, TableDefinition> tableDefinitionMap,
+                                      ConcurrentMap<String, String> tableCreateMap) throws Exception {
         try {
             //获取数据库的元数据
             DatabaseMetaData db = connection.getMetaData();
@@ -70,7 +86,9 @@ public abstract class AbstractDatabase {
         }
     }
 
-    protected void getColumnDefinition(String tableName, ConcurrentMap<String, TableDefinition> tableDefinitionMap) throws Exception {
+    protected void getColumnDefinition(String tableName,
+                                       ConcurrentMap<String, TableDefinition> tableDefinitionMap,
+                                       ConcurrentMap<String, String> tableCreateMap) throws Exception {
         List<Map<String, String>> list = new ArrayList<>(32);
         try {
             //结果集元数据

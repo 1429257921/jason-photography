@@ -17,9 +17,13 @@ public class TemplateDefinition implements Serializable {
      */
     private String baseTemplateFilePath;
     /**
-     * 模板文件名称（文件名称+小数点+文件扩展名）
+     * 模板文件名称
      */
     private String templateFileName;
+    /**
+     * 模板文件名称（文件名称+小数点+文件扩展名）
+     */
+    private String fullTemplateFileName;
     /**
      * 输出文件基础路径
      */

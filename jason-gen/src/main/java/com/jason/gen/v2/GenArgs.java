@@ -26,6 +26,8 @@ public class GenArgs implements Serializable {
     private String modules;
     private String author;
     private String tables;
+    private String filterTableNamePrefix;
+    private String filterColumnNamePrefix;
     private String databaseDriverClassName;
     private String databaseUrl;
     private String databaseUsername;
@@ -44,11 +46,19 @@ public class GenArgs implements Serializable {
         /**
          * 表名数组
          */
-        private final List<String> tableList = new ArrayList<>(16);
+        private final List<String> tableList = new ArrayList<>(8);
         /**
          * 模块名数组
          */
-        private final List<String> moduleList = new ArrayList<>(16);
+        private final List<String> moduleList = new ArrayList<>(8);
+        /**
+         * 过滤表名前缀数组
+         */
+        private final List<String> filterTableNamePrefixList = new ArrayList<>(8);
+        /**
+         * 过滤列名前缀数组
+         */
+        private final List<String> filterColumnNamePrefixList = new ArrayList<>(8);
         /**
          * k - 服务名枚举
          * v - 服务生成配置
@@ -66,6 +76,8 @@ public class GenArgs implements Serializable {
         this.modules = properties.getProperty("modules");
         this.author = properties.getProperty("author");
         this.tables = properties.getProperty("tables");
+        this.filterTableNamePrefix = properties.getProperty("filterTableNamePrefix");
+        this.filterColumnNamePrefix = properties.getProperty("filterColumnNamePrefix");
         this.databaseDriverClassName = properties.getProperty("databaseDriverClassName");
         this.databaseUrl = properties.getProperty("databaseUrl");
         this.databaseUsername = properties.getProperty("databaseUsername");
@@ -89,6 +101,8 @@ public class GenArgs implements Serializable {
         ConvertData initConvertData = new ConvertData();
         initConvertData.tableList.addAll(convertList(this.tables));
         initConvertData.moduleList.addAll(convertList(this.modules));
+        initConvertData.filterTableNamePrefixList.addAll(convertList(this.filterTableNamePrefix));
+        initConvertData.filterColumnNamePrefixList.addAll(convertList(this.filterColumnNamePrefix));
         for (String module : initConvertData.moduleList) {
             ServiceNameEnum serviceNameEnum = ServiceNameEnum.get(module);
             if (serviceNameEnum != null) {

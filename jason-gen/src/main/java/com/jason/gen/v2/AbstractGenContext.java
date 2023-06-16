@@ -3,16 +3,14 @@ package com.jason.gen.v2;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.io.IoUtil;
+import cn.hutool.core.text.NamingCase;
 import cn.hutool.core.text.StrPool;
 import cn.hutool.core.util.StrUtil;
-import cn.hutool.json.JSONUtil;
+import cn.hutool.extra.pinyin.PinyinUtil;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -79,12 +77,23 @@ public abstract class AbstractGenContext {
         // 加载数据库表信息
         loadDataBaseTableInfo(genArgs);
 
+        // 过滤表名前缀
+        filterTableNamePrefix(this.genArgs.getConvertData().getFilterTableNamePrefixList(), this.tableDefinitionMap);
+
+        // 过滤列名前缀
+        filterColumnNamePrefix(this.genArgs.getConvertData().getFilterColumnNamePrefixList(), this.tableDefinitionMap);
+
         // 填充数据库列类型映射Java类型
         populateColumnTypeConverter();
-        System.out.println(JSONUtil.toJsonPrettyStr(this.tableDefinitionMap));
+
+        // 填充表名和字段名映射java类名和属性名
+        populateTableNameAndColumnNameConverter();
 
         // 加载模板定义信息
         loadTemplates(genArgs);
+
+        // 填充列类型映射java枚举类型
+        populateColumnEnumConverter();
 
         // 构建输出文件定义信息
         buildOutputFileDefinition();
@@ -100,6 +109,37 @@ public abstract class AbstractGenContext {
 
         // 执行代码生成
         executeCodeGeneration();
+    }
+
+    protected void filterTableNamePrefix(List<String> filterTableNamePrefixList, ConcurrentMap<String, TableDefinition> tableDefinitionMap) {
+        if (CollUtil.isNotEmpty(filterTableNamePrefixList)) {
+            for (String filterTableNamePrefix : filterTableNamePrefixList) {
+                tableDefinitionMap.values().forEach(item -> {
+                    String tableName = item.getTableName();
+                    if (tableName.indexOf(filterTableNamePrefix) == 0) {
+                        String substring = tableName.substring(filterTableNamePrefix.length());
+                        item.setFilterTableName(substring);
+                    }
+                });
+            }
+        }
+    }
+
+    protected void filterColumnNamePrefix(List<String> columnTableNamePrefixList, ConcurrentMap<String, TableDefinition> tableDefinitionMap) {
+        if (CollUtil.isNotEmpty(columnTableNamePrefixList)) {
+            for (String columnTableNamePrefix : columnTableNamePrefixList) {
+                tableDefinitionMap.values().forEach(item -> {
+                    List<ColumnDefinition> columnDefinitionsList = item.getColumnDefinitionsList();
+                    columnDefinitionsList.forEach(n -> {
+                        String columnName = n.getColumnName();
+                        if (columnName.indexOf(columnTableNamePrefix) == 0) {
+                            String substring = columnName.substring(columnTableNamePrefix.length());
+                            n.setFilterColumnName(substring);
+                        }
+                    });
+                });
+            }
+        }
     }
 
     /**
@@ -172,7 +212,7 @@ public abstract class AbstractGenContext {
         if (this.genArgs == null) {
             throw new Exception("配置参数转换Bean失败");
         }
-        // 二次初始化
+        // 初始化
         genArgs.init(this.genArgsProperties);
 
         // 解析类型映射参数
@@ -187,13 +227,23 @@ public abstract class AbstractGenContext {
     }
 
     protected void loadDataBaseTableInfo(GenArgs genArgs) throws Exception {
-        this.tableDefinitionMap.putAll(abstractDatabase.init(genArgs));
+        ConcurrentMap<String, TableDefinition> tableDefinitionConcurrentMap = abstractDatabase.init(genArgs);
+        this.tableDefinitionMap.putAll(tableDefinitionConcurrentMap);
     }
 
     protected void populateColumnTypeConverter() {
         for (String tableName : this.tableDefinitionMap.keySet()) {
             TableDefinition tableDefinition = this.tableDefinitionMap.get(tableName);
+            // 将_转换成大驼峰
+            tableDefinition.setJavaClassName(NamingCase.toPascalCase(
+                    StrUtil.isNotBlank(tableDefinition.getFilterTableName()) ?
+                            tableDefinition.getFilterTableName() :
+                            tableDefinition.getTableName()));
             for (ColumnDefinition columnDefinition : tableDefinition.getColumnDefinitionsList()) {
+                columnDefinition.setJavaFieldName(NamingCase.toPascalCase(
+                        StrUtil.isNotBlank(columnDefinition.getFilterColumnName()) ?
+                                columnDefinition.getFilterColumnName() :
+                                columnDefinition.getColumnName()));
                 this.typeConvertMap.forEach((k, v) -> {
                     String jdbcTypeName = columnDefinition.getJdbcTypeName();
                     if (jdbcTypeName.equalsIgnoreCase(k)) {
@@ -203,6 +253,78 @@ public abstract class AbstractGenContext {
                 });
             }
         }
+    }
+
+    private void populateTableNameAndColumnNameConverter() {
+        for (String tableName : this.tableDefinitionMap.keySet()) {
+            TableDefinition tableDefinition = this.tableDefinitionMap.get(tableName);
+            // 将_转换成大驼峰
+            tableDefinition.setJavaClassName(NamingCase.toPascalCase(
+                    StrUtil.isNotBlank(tableDefinition.getFilterTableName()) ?
+                            tableDefinition.getFilterTableName() :
+                            tableDefinition.getTableName()));
+            for (ColumnDefinition columnDefinition : tableDefinition.getColumnDefinitionsList()) {
+                columnDefinition.setJavaFieldName(NamingCase.toPascalCase(
+                        StrUtil.isNotBlank(columnDefinition.getFilterColumnName()) ?
+                                columnDefinition.getFilterColumnName() :
+                                columnDefinition.getColumnName()));
+            }
+        }
+    }
+
+    protected void populateColumnEnumConverter() throws Exception {
+        for (String tableName : this.tableDefinitionMap.keySet()) {
+            TableDefinition tableDefinition = this.tableDefinitionMap.get(tableName);
+            // 校验参数
+            JpValidationUtil.check(tableDefinition);
+            for (ColumnDefinition columnDefinition : tableDefinition.getColumnDefinitionsList()) {
+                String columnComment = columnDefinition.getColumnComment();
+                List<EnumDefinition> enumDefinitionList = buildEnumDefinitionList(columnComment);
+                columnDefinition.setEnumType(false);
+                if (CollUtil.isNotEmpty(enumDefinitionList)) {
+                    for (EnumDefinition enumDefinition : enumDefinitionList) {
+                        // 填充枚举信息
+                        TemplateDefinition enumTemplateDefinition = this.templateDefinitionList.stream()
+                                .filter(n -> TemplateFileNameEnum.EntityP.name().equalsIgnoreCase(n.getTemplateFileName())).findFirst()
+                                .orElse(new TemplateDefinition());
+                        columnDefinition.setJavaTypeName(NamingCase.toPascalCase(columnDefinition.getJavaFieldName()) + "Enum");
+                        columnDefinition.setJavaTypePackage(enumTemplateDefinition.getBaseOutputFilePath());
+                        // TODO
+                        columnDefinition.setDefaultValue(null);
+                        columnDefinition.setEnumType(true);
+                    }
+                    columnDefinition.setEnumDefinitionList(enumDefinitionList);
+                }
+            }
+        }
+    }
+
+    private static List<EnumDefinition> buildEnumDefinitionList(String columnComment) {
+        List<EnumDefinition> enumDefinitionList = new ArrayList<>(16);
+        if (isEnumField(columnComment)) {
+            int indexBegin = columnComment.indexOf("（");
+            int indexEnd = columnComment.indexOf("）");
+            String enumValueStr = columnComment.substring(indexBegin + 1, indexEnd).trim();
+            String[] split1 = enumValueStr.split("，");
+            for (int i = 0; i < split1.length; i++) {
+                EnumDefinition enumDefinition = new EnumDefinition();
+                String[] split2 = split1[i].split("、");
+                Integer value = Integer.valueOf(split2[0].trim());
+                enumDefinition.setValue(value);
+                String desc = split2[1].trim();
+                enumDefinition.setDesc(desc);
+                enumDefinition.setEnumName(PinyinUtil.getFirstLetter(desc, "") + value);
+                enumDefinitionList.add(enumDefinition);
+            }
+        }
+        return enumDefinitionList;
+    }
+
+    private static boolean isEnumField(String remarks) {
+        if (remarks.contains("状态") || remarks.contains("类型") || remarks.contains("删除标志")) {
+            return remarks.contains("（") && remarks.contains("）");
+        }
+        return false;
     }
 
     /**

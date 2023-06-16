@@ -18,6 +18,14 @@ public class TableDefinition implements Serializable {
      */
     private String tableName;
     /**
+     * 过滤前缀后的表名
+     */
+    private String filterTableName;
+    /**
+     * java实体类名
+     */
+    private String javaClassName;
+    /**
      * 表注释
      */
     private String tableComment;
