@@ -1,23 +1,25 @@
 package com.jason.photography.dao.enums.db;
 
-import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.annotation.EnumValue;
 import com.baomidou.mybatisplus.annotation.IEnum;
 import com.fasterxml.jackson.annotation.JsonValue;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
+import java.util.Arrays;
+
 /**
- * t_admin_account表删除标志枚举类
+ * 删除标志枚举类
  *
  * @author guozhongcheng
- * @since 2023-06-11
+ * @since 2023-06-18
  */
 @Getter
 @AllArgsConstructor
+@SuppressWarnings("all")
 public enum DelFlagEnum implements IEnum<Integer> {
     /**
-     * （0、正常，1、删除）
+     * 删除标志
      **/
     zc0(0, "正常"),
     sc1(1, "删除"),
@@ -28,25 +30,11 @@ public enum DelFlagEnum implements IEnum<Integer> {
     private final String desc;
 
     public static DelFlagEnum getEnum(Integer value) {
-        if (value != null) {
-            for (DelFlagEnum valueEnum : DelFlagEnum.values()) {
-                if (valueEnum.getValue().equals(value)) {
-                    return valueEnum;
-                }
-            }
-        }
-        return null;
+        return Arrays.stream(DelFlagEnum.values()).filter(valueEnum -> valueEnum.getValue().equals(value)).findFirst().orElse(null);
     }
 
     public static DelFlagEnum getEnum(String desc) {
-        if (StrUtil.isNotBlank(desc)) {
-            for (DelFlagEnum valueEnum : DelFlagEnum.values()) {
-                if (valueEnum.getDesc().equals(desc)) {
-                    return valueEnum;
-                }
-            }
-        }
-        return null;
+        return Arrays.stream(DelFlagEnum.values()).filter(valueEnum -> valueEnum.getDesc().equals(desc)).findFirst().orElse(null);
     }
 
     public static String getDesc(Integer value) {
