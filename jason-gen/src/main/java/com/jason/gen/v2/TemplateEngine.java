@@ -21,27 +21,31 @@ public interface TemplateEngine {
      * @return List<TemplateDefinition>
      * @throws Exception 异常
      */
-    List<TemplateDefinition> loadTemplates(@NotNull GenArgs genArgs) throws Exception;
+    ConcurrentMap<TemplateFileNameEnum, TemplateDefinition> loadTemplates(@NotNull GenArgs genArgs) throws Exception;
 
     /**
      * 填充模板定义参数
      *
-     * @param templateDefinitionList 模板定义对象数组
+     * @param templateDefinitionMap   模板定义对象数组
      * @param tableDefinitionMap
      * @param typeConvertMap
+     * @param outputFileDefinitionMap
      * @throws Exception 异常
      */
-    void populateTemplateDefinition(@NotNull List<TemplateDefinition> templateDefinitionList,
+    void populateTemplateDefinition(@NotNull ConcurrentMap<TemplateFileNameEnum, TemplateDefinition> templateDefinitionMap,
                                     @NotNull ConcurrentMap<String, TableDefinition> tableDefinitionMap,
-                                    @NotNull ConcurrentMap<String, TypeConvertDefinition> typeConvertMap) throws Exception;
+                                    @NotNull ConcurrentMap<String, TypeConvertDefinition> typeConvertMap,
+                                    @NotNull ConcurrentMap<ServiceNameEnum, List<OutputFileDefinition>> outputFileDefinitionMap) throws Exception;
 
     /**
      * 输出文件
      *
-     * @param templateDefinitionList 模板定义对象数组
+     * @param genArgs 模板定义对象数组
+     * @param outputFileDefinitionMap 模板定义对象数组
      * @throws Exception 异常
      */
-    void outputFile(@NotNull List<TemplateDefinition> templateDefinitionList) throws Exception;
+    void outputFile(@NotNull GenArgs genArgs,
+                    @NotNull ConcurrentMap<ServiceNameEnum, List<OutputFileDefinition>> outputFileDefinitionMap) throws Exception;
 
 
 }

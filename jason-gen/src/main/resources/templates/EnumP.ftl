@@ -1,4 +1,4 @@
-package ${enumPackage};
+package ${packageEnum};
 
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.annotation.EnumValue;
@@ -8,18 +8,18 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 /**
- * ${tableName}表${comment!}枚举类
+ * ${tableName}表${enumColumnDefinition.columnCommentBrief!}枚举类
  *
  * @author ${author}
  * @since ${date}
  */
 @Getter
 @AllArgsConstructor
-public enum ${enumFileName} implements IEnum<Integer> {
+public enum ${enumClassName} implements IEnum<Integer> {
     /**
-     * ${commentDesc!}
+     * ${enumColumnDefinition.columnCommentBrief!}
      **/
-    <#list enumValueList as enumValue>
+    <#list enumColumnDefinition.enumDefinitionList as enumValue>
     ${enumValue.enumName}${enumValue?index}(${enumValue.value}, "${enumValue.desc}"),
     </#list>
     ;
@@ -29,25 +29,11 @@ public enum ${enumFileName} implements IEnum<Integer> {
     private final String desc;
 
     public static ${enumFileName} getEnum(Integer value) {
-        if (value != null) {
-            for (${enumFileName} valueEnum : ${enumFileName}.values()) {
-                if (valueEnum.getValue().equals(value)) {
-                    return valueEnum;
-                }
-            }
-        }
-        return null;
+        return Arrays.stream(${enumClassName}.values()).filter(valueEnum -> valueEnum.getValue().equals(value)).findFirst().get();
     }
 
     public static ${enumFileName} getEnum(String desc) {
-        if (StrUtil.isNotBlank(desc)) {
-            for (${enumFileName} valueEnum : ${enumFileName}.values()) {
-                if (valueEnum.getDesc().equals(desc)) {
-                    return valueEnum;
-                }
-            }
-        }
-        return null;
+        return Arrays.stream(${enumClassName}.values()).filter(valueEnum -> valueEnum.getDesc().equals(desc)).findFirst().get();
     }
 
     public static String getDesc(Integer value) {

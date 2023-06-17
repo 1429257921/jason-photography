@@ -1,32 +1,46 @@
 package ${packageEntity};
 
 import com.baomidou.mybatisplus.annotation.*;
+<#assign isGenEnum = "false">
 <#list columnDefinitionList as field>
-<#if field.columnName ? contains("status") || field.columnName ? contains("type")>
-	<#if field.columnComment ? contains("状态") || field.columnComment ? contains("类型")>
-	    <#if field.columnComment ? contains("（") && field.columnComment ? contains("）")>
-import com.jason.photography.dao.enums.db.*;
-	    </#if>
-	</#if>
-</#if>
+    <#if field.enumType == "true">
+		<#if isGenEnum == "false">
+import ${field.javaTypePackage}.*;
+        <#assign isGenEnum = "true">
+        </#if>
+    </#if>
 </#list>
+
+
 import lombok.*;
 
 import java.io.Serial;
 import java.io.Serializable;
+<#assign isGenBigDecimal = "false">
+<#assign isGenBigLocalDate = "false">
+<#assign isGenLocalDateTime = "false">
 <#list columnDefinitionList as field>
-    <#if field.javaTypeName = "BigDecimal">
-import java.math.BigDecimal;
+    <#if field.javaTypeName == "BigDecimal">
+		<#if isGenBigDecimal == "false">
+import ${javaTypePackage}.${javaTypeName};
+            <#assign isGenBigDecimal = "true">
+		</#if>
 	<#elseif field.javaTypeName = "LocalDateTime">
-import java.time.LocalDateTime;
+		<#if isGenBigLocalDate == "false">
+import ${javaTypePackage}.${javaTypeName};
+		</#if>
+        <#assign isGenBigLocalDate = "true">
 	<#elseif field.javaTypeName = "LocalDate">
-import java.time.LocalDate;
+		<#if isGenLocalDateTime == "false">
+import ${javaTypePackage}.${javaTypeName};
+        <#assign isGenLocalDateTime = "true">
+        </#if>
     </#if>
 </#list>
 
 /**
  * <p>
- * ${tableName!}
+ * ${tableComment!}
  * </p>
  *
  * @author ${author}
@@ -39,7 +53,7 @@ import java.time.LocalDate;
 @ToString
 @EqualsAndHashCode(callSuper = false)
 @TableName("${tableName}")
-public class ${outputFileName} implements Serializable {
+public class ${entityClassName} implements Serializable {
 
 	@Serial
     private static final long serialVersionUID = 1L;
@@ -62,14 +76,22 @@ public class ${outputFileName} implements Serializable {
     </#if>
 	<#-- 启用状态 -->
     <#if field.columnName == "status">
-	private ${field.javaTypeName} status = ${field.javaTypeName}.qy0;
+		<#if field.defaultValue== "" || field.defaultValue!>
+	private ${field.javaTypeName} ${field.javaFieldName};
+            <#continue>
+		</#if>
+	private ${field.javaTypeName} ${field.javaFieldName} = ${field.defaultValue};
         <#continue>
     </#if>
     <#-- 逻辑删除注解 -->
     <#if field.columnName == "del_flag">
 	@TableField("${field.columnName}")
 	@TableLogic
-	private ${field.javaTypeName} deleted = ${field.javaTypeName}.zc0;
+		<#if field.defaultValue== "" || field.defaultValue!>
+	private ${field.javaTypeName} deleted;
+            <#continue>
+        </#if>
+	private ${field.javaTypeName} deleted = ${field.defaultValue};
 		<#continue>
     </#if>
 	private ${field.javaTypeName} ${field.javaFieldName};

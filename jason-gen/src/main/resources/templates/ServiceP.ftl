@@ -1,14 +1,14 @@
-package ${package.Service};
+package ${packageService};
 
-import com.jason.photography.dao.entity.po.${entity};
+import ${packageEntity}.${entityClassName};
 import com.jason.common.database.service.BaseService;
 
 /**
- * ${table.comment!}业务接口
+ * ${tableComment}业务接口
  *
  * @author ${author}
  * @since ${date}
  */
-public interface ${serviceClassName!}${entity}Service extends BaseService<${entity}> {
+public interface ${serviceClassName} extends BaseService<${entityClassName}> {
 
 }

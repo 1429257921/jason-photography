@@ -118,7 +118,7 @@ public abstract class AbstractDatabase {
             columnDefinitionList.add(jsonObject.toBean(ColumnDefinition.class));
         }
         TableDefinition tableDefinition = tableDefinitionMap.get(tableName);
-        tableDefinition.setColumnDefinitionsList(columnDefinitionList);
+        tableDefinition.setColumnDefinitionList(columnDefinitionList);
     }
 
     protected void getConnection(GenArgs genArgs) throws Exception {

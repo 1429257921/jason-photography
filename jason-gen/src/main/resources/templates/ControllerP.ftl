@@ -1,6 +1,6 @@
 package ${packageController};
 
-import ${packageService}.${entity}Service;
+import ${packageService}.${serviceClassName};
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -15,10 +15,10 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("api")
-public class ${entity}Controller {
+@RequestMapping("${apiBasePath}")
+public class ${controllerClassName} {
 
-    private final ${entity}Service ${entity?uncap_first}Service;
+    private final ${serviceClassName} ${serviceClassName?uncap_first};
 
 
 

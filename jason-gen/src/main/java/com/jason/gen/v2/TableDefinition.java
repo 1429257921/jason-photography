@@ -22,6 +22,10 @@ public class TableDefinition implements Serializable {
      */
     private String filterTableName;
     /**
+     * 接口路径前缀
+     */
+    private String apiBasePath;
+    /**
      * java实体类名
      */
     private String javaClassName;
@@ -32,7 +36,7 @@ public class TableDefinition implements Serializable {
     /**
      * 当前表内的列定义信息数组
      */
-    private List<ColumnDefinition> columnDefinitionsList;
+    private List<ColumnDefinition> columnDefinitionList;
 
 
 }

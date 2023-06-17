@@ -32,8 +32,8 @@ public class DefaultGenContext extends AbstractGenContext {
     }
 
     @Override
-    protected void populateTemplateDefinition() throws Exception {
-        super.populateTemplateDefinition();
+    protected void populateTemplatePopulateData() throws Exception {
+        super.populateTemplatePopulateData();
     }
 
     @Override

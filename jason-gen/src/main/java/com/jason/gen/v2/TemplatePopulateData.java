@@ -13,8 +13,10 @@ import java.util.List;
 @Data
 public class TemplatePopulateData extends TableDefinition {
 
+    private String moduleName;
     private String author;
     private String date;
+
     private String packageController;
     private String packageService;
     private String packageServiceImpl;
@@ -31,8 +33,5 @@ public class TemplatePopulateData extends TableDefinition {
     private String mapperXmlClassName;
     private String enumClassName;
 
-    private String tableName;
-    private String tableComment;
-
-    private List<ColumnDefinition> columnDefinitionList;
+    private ColumnDefinition enumColumnDefinition;
 }

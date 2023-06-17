@@ -28,6 +28,7 @@ public class GenArgs implements Serializable {
     private String tables;
     private String filterTableNamePrefix;
     private String filterColumnNamePrefix;
+    private Boolean overwriteFile;
     private String databaseDriverClassName;
     private String databaseUrl;
     private String databaseUsername;
@@ -72,23 +73,24 @@ public class GenArgs implements Serializable {
      * @param properties 配置参数对象
      */
     public void init(Properties properties) throws Exception {
-        this.projectPath = properties.getProperty("projectPath");
-        this.modules = properties.getProperty("modules");
-        this.author = properties.getProperty("author");
-        this.tables = properties.getProperty("tables");
-        this.filterTableNamePrefix = properties.getProperty("filterTableNamePrefix");
-        this.filterColumnNamePrefix = properties.getProperty("filterColumnNamePrefix");
-        this.databaseDriverClassName = properties.getProperty("databaseDriverClassName");
-        this.databaseUrl = properties.getProperty("databaseUrl");
-        this.databaseUsername = properties.getProperty("databaseUsername");
-        this.databasePassword = properties.getProperty("databasePassword");
-        this.genController = properties.getProperty("genController");
-        this.genService = properties.getProperty("genService");
-        this.genServiceImpl = properties.getProperty("genServiceImpl");
-        this.genEntity = properties.getProperty("genEntity");
-        this.genMapper = properties.getProperty("genMapper");
-        this.genMapperXml = properties.getProperty("genMapperXml");
-        this.genEnum = properties.getProperty("genEnum");
+        this.projectPath = properties.getProperty("projectPath", "");
+        this.modules = properties.getProperty("modules", "");
+        this.author = properties.getProperty("author", "");
+        this.tables = properties.getProperty("tables", "");
+        this.filterTableNamePrefix = properties.getProperty("filterTableNamePrefix", "");
+        this.filterColumnNamePrefix = properties.getProperty("filterColumnNamePrefix", "");
+        this.overwriteFile = Boolean.parseBoolean(properties.getProperty("overwriteFile", "false"));
+        this.databaseDriverClassName = properties.getProperty("databaseDriverClassName", "");
+        this.databaseUrl = properties.getProperty("databaseUrl", "");
+        this.databaseUsername = properties.getProperty("databaseUsername", "");
+        this.databasePassword = properties.getProperty("databasePassword", "");
+        this.genController = properties.getProperty("genController", "");
+        this.genService = properties.getProperty("genService", "");
+        this.genServiceImpl = properties.getProperty("genServiceImpl", "");
+        this.genEntity = properties.getProperty("genEntity", "");
+        this.genMapper = properties.getProperty("genMapper", "");
+        this.genMapperXml = properties.getProperty("genMapperXml", "");
+        this.genEnum = properties.getProperty("genEnum", "");
 
         this.initConvertData();
     }
@@ -119,29 +121,89 @@ public class GenArgs implements Serializable {
      */
     private void populateGenFilePath(ServiceNameEnum serviceNameEnum, ServiceGenConfig serviceGenConfig) {
         if (Constant.Api.SERVICE_NAME == serviceNameEnum) {
-            serviceGenConfig.setGenControllerPath(serviceGenConfig.getGenController() ? this.projectPath + Constant.SEPARATOR + Constant.Api.FULL_CONTROLLER_PACKAGE : null);
-            serviceGenConfig.setGenServicePath(serviceGenConfig.getGenService() ? this.projectPath + Constant.SEPARATOR + Constant.Api.FULL_SERVICE_PACKAGE : null);
-            serviceGenConfig.setGenServiceImplPath(serviceGenConfig.getGenServiceImpl() ? this.projectPath + Constant.SEPARATOR + Constant.Api.FULL_SERVICE_IMPL_PACKAGE : null);
-            serviceGenConfig.setGenEntityPath(serviceGenConfig.getGenEntity() ? this.projectPath + Constant.SEPARATOR + Constant.Api.FULL_ENTITY_PACKAGE : null);
-            serviceGenConfig.setGenMapperPath(serviceGenConfig.getGenMapper() ? this.projectPath + Constant.SEPARATOR + Constant.Api.FULL_MAPPER_PACKAGE : null);
-            serviceGenConfig.setGenMapperXmlPath(serviceGenConfig.getGenMapperXml() ? this.projectPath + Constant.SEPARATOR + Constant.Api.FULL_MAPPER_XML_PACKAGE : null);
-            serviceGenConfig.setGenEnumPath(serviceGenConfig.getGenEnum() ? this.projectPath + Constant.SEPARATOR + Constant.Api.FULL_ENUM_PACKAGE : null);
+            if (serviceGenConfig.getGenController()) {
+                serviceGenConfig.setGenControllerPath(this.projectPath + Constant.SEPARATOR + Constant.Api.FULL_CONTROLLER_PACKAGE);
+                serviceGenConfig.setPackageController(Constant.Api.BASE_PACKAGE + StrPool.DOT + Constant.CONTROLLER_PACKAGE);
+            }
+            if (serviceGenConfig.getGenService()) {
+                serviceGenConfig.setGenServicePath(this.projectPath + Constant.SEPARATOR + Constant.Api.FULL_SERVICE_PACKAGE);
+                serviceGenConfig.setPackageService(Constant.Api.BASE_PACKAGE + StrPool.DOT + Constant.SERVICE_PACKAGE);
+            }
+            if (serviceGenConfig.getGenServiceImpl()) {
+                serviceGenConfig.setGenServiceImplPath(this.projectPath + Constant.SEPARATOR + Constant.Api.FULL_SERVICE_IMPL_PACKAGE);
+                serviceGenConfig.setPackageServiceImpl(Constant.Api.BASE_PACKAGE + StrPool.DOT + Constant.SERVICE_IMPL_PACKAGE);
+            }
+            if (serviceGenConfig.getGenEntity()) {
+                serviceGenConfig.setGenEntityPath(this.projectPath + Constant.SEPARATOR + Constant.Api.FULL_ENTITY_PACKAGE);
+                serviceGenConfig.setPackageEntity(Constant.Api.BASE_PACKAGE + StrPool.DOT + Constant.ENTITY_PACKAGE);
+            }
+            if (serviceGenConfig.getGenMapper()) {
+                serviceGenConfig.setGenMapperPath(this.projectPath + Constant.SEPARATOR + Constant.Api.FULL_MAPPER_PACKAGE);
+                serviceGenConfig.setPackageMapper(Constant.Api.BASE_PACKAGE + StrPool.DOT + Constant.MAPPER_PACKAGE);
+            }
+            if (serviceGenConfig.getGenMapperXml()) {
+                serviceGenConfig.setGenMapperXmlPath(this.projectPath + Constant.SEPARATOR + Constant.Api.FULL_MAPPER_XML_PACKAGE);
+            }
+            if (serviceGenConfig.getGenEnum()) {
+                serviceGenConfig.setGenEnumPath(this.projectPath + Constant.SEPARATOR + Constant.Api.FULL_ENUM_PACKAGE);
+                serviceGenConfig.setPackageEnum(Constant.Api.BASE_PACKAGE + StrPool.DOT + Constant.ENUM_PACKAGE);
+            }
         } else if (Constant.Admin.SERVICE_NAME == serviceNameEnum) {
-            serviceGenConfig.setGenControllerPath(serviceGenConfig.getGenController() ? this.projectPath + Constant.SEPARATOR + Constant.Admin.FULL_CONTROLLER_PACKAGE : null);
-            serviceGenConfig.setGenServicePath(serviceGenConfig.getGenService() ? this.projectPath + Constant.SEPARATOR + Constant.Admin.FULL_SERVICE_PACKAGE : null);
-            serviceGenConfig.setGenServiceImplPath(serviceGenConfig.getGenServiceImpl() ? this.projectPath + Constant.SEPARATOR + Constant.Admin.FULL_SERVICE_IMPL_PACKAGE : null);
-            serviceGenConfig.setGenEntityPath(serviceGenConfig.getGenEntity() ? this.projectPath + Constant.SEPARATOR + Constant.Admin.FULL_ENTITY_PACKAGE : null);
-            serviceGenConfig.setGenMapperPath(serviceGenConfig.getGenMapper() ? this.projectPath + Constant.SEPARATOR + Constant.Admin.FULL_MAPPER_PACKAGE : null);
-            serviceGenConfig.setGenMapperXmlPath(serviceGenConfig.getGenMapperXml() ? this.projectPath + Constant.SEPARATOR + Constant.Admin.FULL_MAPPER_XML_PACKAGE : null);
-            serviceGenConfig.setGenEnumPath(serviceGenConfig.getGenEnum() ? this.projectPath + Constant.SEPARATOR + Constant.Admin.FULL_ENUM_PACKAGE : null);
+            if (serviceGenConfig.getGenController()) {
+                serviceGenConfig.setGenControllerPath(this.projectPath + Constant.SEPARATOR + Constant.Admin.FULL_CONTROLLER_PACKAGE);
+                serviceGenConfig.setPackageController(Constant.Admin.BASE_PACKAGE + StrPool.DOT + Constant.CONTROLLER_PACKAGE);
+            }
+            if (serviceGenConfig.getGenService()) {
+                serviceGenConfig.setGenServicePath(this.projectPath + Constant.SEPARATOR + Constant.Admin.FULL_SERVICE_PACKAGE);
+                serviceGenConfig.setPackageService(Constant.Admin.BASE_PACKAGE + StrPool.DOT + Constant.SERVICE_PACKAGE);
+            }
+            if (serviceGenConfig.getGenServiceImpl()) {
+                serviceGenConfig.setGenServiceImplPath(this.projectPath + Constant.SEPARATOR + Constant.Admin.FULL_SERVICE_IMPL_PACKAGE);
+                serviceGenConfig.setPackageServiceImpl(Constant.Admin.BASE_PACKAGE + StrPool.DOT + Constant.SERVICE_IMPL_PACKAGE);
+            }
+            if (serviceGenConfig.getGenEntity()) {
+                serviceGenConfig.setGenEntityPath(this.projectPath + Constant.SEPARATOR + Constant.Admin.FULL_ENTITY_PACKAGE);
+                serviceGenConfig.setPackageEntity(Constant.Admin.BASE_PACKAGE + StrPool.DOT + Constant.ENTITY_PACKAGE);
+            }
+            if (serviceGenConfig.getGenMapper()) {
+                serviceGenConfig.setGenMapperPath(this.projectPath + Constant.SEPARATOR + Constant.Admin.FULL_MAPPER_PACKAGE);
+                serviceGenConfig.setPackageMapper(Constant.Admin.BASE_PACKAGE + StrPool.DOT + Constant.MAPPER_PACKAGE);
+            }
+            if (serviceGenConfig.getGenMapperXml()) {
+                serviceGenConfig.setGenMapperXmlPath(this.projectPath + Constant.SEPARATOR + Constant.Admin.FULL_MAPPER_XML_PACKAGE);
+            }
+            if (serviceGenConfig.getGenEnum()) {
+                serviceGenConfig.setGenEnumPath(this.projectPath + Constant.SEPARATOR + Constant.Admin.FULL_ENUM_PACKAGE);
+                serviceGenConfig.setPackageEnum(Constant.Admin.BASE_PACKAGE + StrPool.DOT + Constant.ENUM_PACKAGE);
+            }
         } else if (Constant.Dao.SERVICE_NAME == serviceNameEnum) {
-            serviceGenConfig.setGenControllerPath(serviceGenConfig.getGenController() ? this.projectPath + Constant.SEPARATOR + Constant.Dao.FULL_CONTROLLER_PACKAGE : null);
-            serviceGenConfig.setGenServicePath(serviceGenConfig.getGenService() ? this.projectPath + Constant.SEPARATOR + Constant.Dao.FULL_SERVICE_PACKAGE : null);
-            serviceGenConfig.setGenServiceImplPath(serviceGenConfig.getGenServiceImpl() ? this.projectPath + Constant.SEPARATOR + Constant.Dao.FULL_SERVICE_IMPL_PACKAGE : null);
-            serviceGenConfig.setGenEntityPath(serviceGenConfig.getGenEntity() ? this.projectPath + Constant.SEPARATOR + Constant.Dao.FULL_ENTITY_PACKAGE : null);
-            serviceGenConfig.setGenMapperPath(serviceGenConfig.getGenMapper() ? this.projectPath + Constant.SEPARATOR + Constant.Dao.FULL_MAPPER_PACKAGE : null);
-            serviceGenConfig.setGenMapperXmlPath(serviceGenConfig.getGenMapperXml() ? this.projectPath + Constant.SEPARATOR + Constant.Dao.FULL_MAPPER_XML_PACKAGE : null);
-            serviceGenConfig.setGenEnumPath(serviceGenConfig.getGenEnum() ? this.projectPath + Constant.SEPARATOR + Constant.Dao.FULL_ENUM_PACKAGE : null);
+            if (serviceGenConfig.getGenController()) {
+                serviceGenConfig.setGenControllerPath(this.projectPath + Constant.SEPARATOR + Constant.Dao.FULL_CONTROLLER_PACKAGE);
+                serviceGenConfig.setPackageController(Constant.Dao.BASE_PACKAGE + StrPool.DOT + Constant.CONTROLLER_PACKAGE);
+            }
+            if (serviceGenConfig.getGenService()) {
+                serviceGenConfig.setGenServicePath(this.projectPath + Constant.SEPARATOR + Constant.Dao.FULL_SERVICE_PACKAGE);
+                serviceGenConfig.setPackageService(Constant.Dao.BASE_PACKAGE + StrPool.DOT + Constant.SERVICE_PACKAGE);
+            }
+            if (serviceGenConfig.getGenServiceImpl()) {
+                serviceGenConfig.setGenServiceImplPath(this.projectPath + Constant.SEPARATOR + Constant.Dao.FULL_SERVICE_IMPL_PACKAGE);
+                serviceGenConfig.setPackageServiceImpl(Constant.Dao.BASE_PACKAGE + StrPool.DOT + Constant.SERVICE_IMPL_PACKAGE);
+            }
+            if (serviceGenConfig.getGenEntity()) {
+                serviceGenConfig.setGenEntityPath(this.projectPath + Constant.SEPARATOR + Constant.Dao.FULL_ENTITY_PACKAGE);
+                serviceGenConfig.setPackageEntity(Constant.Dao.BASE_PACKAGE + StrPool.DOT + Constant.ENTITY_PACKAGE);
+            }
+            if (serviceGenConfig.getGenMapper()) {
+                serviceGenConfig.setGenMapperPath(this.projectPath + Constant.SEPARATOR + Constant.Dao.FULL_MAPPER_PACKAGE);
+                serviceGenConfig.setPackageMapper(Constant.Dao.BASE_PACKAGE + StrPool.DOT + Constant.MAPPER_PACKAGE);
+            }
+            if (serviceGenConfig.getGenMapperXml()) {
+                serviceGenConfig.setGenMapperXmlPath(this.projectPath + Constant.SEPARATOR + Constant.Dao.FULL_MAPPER_XML_PACKAGE);
+            }
+            if (serviceGenConfig.getGenEnum()) {
+                serviceGenConfig.setGenEnumPath(this.projectPath + Constant.SEPARATOR + Constant.Dao.FULL_ENUM_PACKAGE);
+                serviceGenConfig.setPackageEnum(Constant.Dao.BASE_PACKAGE + StrPool.DOT + Constant.ENUM_PACKAGE);
+            }
         } else {
             System.out.println("类型未找到");
         }

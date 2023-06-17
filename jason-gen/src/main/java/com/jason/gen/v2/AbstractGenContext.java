@@ -2,15 +2,23 @@ package com.jason.gen.v2;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.IoUtil;
+import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.core.text.NamingCase;
 import cn.hutool.core.text.StrPool;
+import cn.hutool.core.util.NumberUtil;
+import cn.hutool.core.util.ReflectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.pinyin.PinyinUtil;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.*;
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -49,6 +57,12 @@ public abstract class AbstractGenContext {
      * 模板引擎
      */
     protected final TemplateEngine templateEngine;
+
+    /**
+     * k - 服务名枚举
+     * v - 服务生成配置
+     */
+    private final ConcurrentMap<ServiceNameEnum, ServiceGenConfig> serviceGenConfigMap = new ConcurrentHashMap<>(16);
     /**
      * K - 保存表名
      * V - 保存了表名、表注释和列相关信息
@@ -62,8 +76,15 @@ public abstract class AbstractGenContext {
     /**
      * 模板定义信息集合
      */
-    protected final List<TemplateDefinition> templateDefinitionList = new ArrayList<>(16);
+    protected final ConcurrentMap<TemplateFileNameEnum, TemplateDefinition> templateDefinitionMap = new ConcurrentHashMap<>(16);
+    /**
+     *
+     */
+    protected final ConcurrentMap<ServiceNameEnum, List<OutputFileDefinition>> outputFileDefinitionMap = new ConcurrentHashMap<>(32);
 
+    /**
+     * 构建
+     */
     public void build() throws Exception {
         // 准备构建
         prepareBuild();
@@ -98,8 +119,8 @@ public abstract class AbstractGenContext {
         // 构建输出文件定义信息
         buildOutputFileDefinition();
 
-        // 填充模板定义参数
-        populateTemplateDefinition();
+        // 填充模板数据
+        populateTemplatePopulateData();
 
         // 代码生成前最好一次调整机会
         lastAdjustment();
@@ -129,7 +150,7 @@ public abstract class AbstractGenContext {
         if (CollUtil.isNotEmpty(columnTableNamePrefixList)) {
             for (String columnTableNamePrefix : columnTableNamePrefixList) {
                 tableDefinitionMap.values().forEach(item -> {
-                    List<ColumnDefinition> columnDefinitionsList = item.getColumnDefinitionsList();
+                    List<ColumnDefinition> columnDefinitionsList = item.getColumnDefinitionList();
                     columnDefinitionsList.forEach(n -> {
                         String columnName = n.getColumnName();
                         if (columnName.indexOf(columnTableNamePrefix) == 0) {
@@ -145,20 +166,108 @@ public abstract class AbstractGenContext {
     /**
      * 核心
      */
-    protected void buildOutputFileDefinition() {
-        OutputFileDefinition definition = new OutputFileDefinition();
-        // 获取需要生成代码的表名称
-        GenArgs.ConvertData convertData = this.genArgs.getConvertData();
-        for (String tableName : convertData.getTableList()) {
-            TableDefinition tableDefinition = this.tableDefinitionMap.get(tableName);
-            for (ColumnDefinition columnDefinition : tableDefinition.getColumnDefinitionsList()) {
-                TypeConvertDefinition typeConvertDefinition = this.typeConvertMap.get(columnDefinition.getColumnName());
-                if (columnDefinition.getJdbcTypeName().equalsIgnoreCase(typeConvertDefinition.getJdbcTypeName())) {
-
+    protected void buildOutputFileDefinition() throws Exception {
+        for (ServiceNameEnum serviceNameEnum : this.serviceGenConfigMap.keySet()) {
+            List<OutputFileDefinition> outputFileDefinitionList = new ArrayList<>(16);
+            ServiceGenConfig serviceGenConfig = this.serviceGenConfigMap.get(serviceNameEnum);
+            for (Field field : serviceGenConfig.getClass().getDeclaredFields()) {
+                field.setAccessible(true);
+                String fieldName = field.getName();
+                Object valueObj = field.get(serviceGenConfig);
+                boolean boo = valueObj instanceof Boolean;
+                if (!boo) {
+                    continue;
+                }
+                if ((boolean) valueObj) {
+                    for (TableDefinition tableDefinition : this.tableDefinitionMap.values()) {
+                        // 构建输出文件定义信息
+                        this.buildOutputFileDefinition(fieldName, serviceNameEnum, outputFileDefinitionList, serviceGenConfig, tableDefinition);
+                    }
                 }
             }
+            this.outputFileDefinitionMap.put(serviceNameEnum, outputFileDefinitionList);
+        }
+    }
+
+    /**
+     * 构建输出文件定义信息
+     *
+     * @param fieldName                列名
+     * @param serviceNameEnum          服务名称枚举
+     * @param outputFileDefinitionList 输出文件定义信息集合
+     * @param serviceGenConfig         服务生成配置
+     * @param tableDefinition          表定义信息
+     */
+    private void buildOutputFileDefinition(String fieldName,
+                                           ServiceNameEnum serviceNameEnum,
+                                           List<OutputFileDefinition> outputFileDefinitionList,
+                                           ServiceGenConfig serviceGenConfig,
+                                           TableDefinition tableDefinition) {
+        OutputFileDefinition outputFileDefinition = new OutputFileDefinition();
+        String outputFileName = convertFileNameSuffix(tableDefinition.getJavaClassName(), fieldName);
+        outputFileDefinition.setOutputFileName(outputFileName);
+        outputFileDefinition.setFullOutputFileName(outputFileName + StrPool.DOT + (fieldName.contains("Xml") ? "xml" : "java"));
+        String baseOutputFilePath = (String) ReflectUtil.getFieldValue(serviceGenConfig, fieldName + "Path");
+        outputFileDefinition.setBaseOutputFilePath(baseOutputFilePath);
+        String templateFileName = fieldName.replace("gen", "") + "P";
+        TemplateDefinition templateDefinition = this.templateDefinitionMap.get(TemplateFileNameEnum.get(templateFileName));
+        if (templateDefinition != null) {
+            outputFileDefinition.setTemplateDefinition(templateDefinition);
         }
 
+        TemplatePopulateData populateData = BeanUtil.copyProperties(tableDefinition, TemplatePopulateData.class);
+        String tempTableName = StrUtil.isNotBlank(tableDefinition.getFilterTableName())
+                ? tableDefinition.getFilterTableName()
+                : tableDefinition.getTableName();
+        populateData.setApiBasePath(serviceNameEnum.name().toLowerCase() + StrPool.SLASH + tempTableName.replace(StrPool.UNDERLINE, StrPool.SLASH));
+        populateData.setModuleName(CharSequenceUtil.lowerFirst(serviceNameEnum.name().toLowerCase()));
+        populateData.setTableName(tableDefinition.getTableName());
+        populateData.setAuthor(this.genArgs.getAuthor());
+        populateData.setDate(DateUtil.today());
+        String populateDataFieldName = "package" + fieldName.replace("gen", "");
+        String baseOutputFilePackage = (String) ReflectUtil.getFieldValue(serviceGenConfig, populateDataFieldName);
+        ReflectUtil.setFieldValue(populateData, populateDataFieldName, baseOutputFilePackage);
+        String populateDataFieldName1 = CharSequenceUtil.lowerFirst(fieldName.replace("gen", "")) + "ClassName";
+        ReflectUtil.setFieldValue(populateData, populateDataFieldName1, tableDefinition.getJavaClassName());
+        outputFileDefinition.setPopulateData(populateData);
+        outputFileDefinitionList.add(outputFileDefinition);
+
+        // 遍历枚举列
+        aaa:
+        for (ColumnDefinition columnDefinition : tableDefinition.getColumnDefinitionList()) {
+            if (columnDefinition.getEnumType()) {
+                for (OutputFileDefinition fileDefinition : outputFileDefinitionList) {
+                    ColumnDefinition enumColumnDefinition = fileDefinition.getPopulateData().getEnumColumnDefinition();
+                    if (enumColumnDefinition != null) {
+                        if (columnDefinition.getColumnName().equals(enumColumnDefinition.getColumnName())) {
+                            break aaa;
+                        }
+                    }
+                }
+                OutputFileDefinition outputEnumFileDefinition = new OutputFileDefinition();
+                BeanUtil.copyProperties(outputFileDefinition, outputEnumFileDefinition);
+                String outputEnumFileName = CharSequenceUtil.upperFirst(columnDefinition.getJavaFieldName()) + "Enum";
+                outputEnumFileDefinition.setOutputFileName(outputEnumFileName);
+                outputEnumFileDefinition.setFullOutputFileName(outputEnumFileName + StrPool.DOT + "java");
+                String baseOutputEnumFilePath = (String) ReflectUtil.getFieldValue(serviceGenConfig, "genEnumPath");
+                outputEnumFileDefinition.setBaseOutputFilePath(baseOutputEnumFilePath);
+                outputEnumFileDefinition.getPopulateData().setEnumColumnDefinition(columnDefinition);
+                outputFileDefinitionList.add(outputEnumFileDefinition);
+            }
+        }
+    }
+
+    private String convertFileNameSuffix(String tableJavaClassName, String fieldName) {
+        String fileNameSuffix = switch (fieldName) {
+            case "genController" -> "Controller";
+            case "genService" -> "Service";
+            case "genServiceImpl" -> "ServiceImpl";
+            case "genEntity" -> "";
+            case "genMapper", "genMapperXml" -> "Mapper";
+            case "genEnum" -> "Enum";
+            default -> "";
+        };
+        return tableJavaClassName + fileNameSuffix;
     }
 
     private void lastAdjustment() {
@@ -166,23 +275,24 @@ public abstract class AbstractGenContext {
     }
 
     protected void executeCodeGeneration() throws Exception {
-        templateEngine.outputFile(this.templateDefinitionList);
+        templateEngine.outputFile(this.genArgs, this.outputFileDefinitionMap);
     }
 
     protected void lastCheck() {
-        CollUtil.isEmpty(this.templateDefinitionList);
+//        CollUtil.isEmpty(this.templateDefinitionList);
     }
 
-    protected void populateTemplateDefinition() throws Exception {
-        templateEngine.populateTemplateDefinition(
-                this.templateDefinitionList,
+    protected void populateTemplatePopulateData() throws Exception {
+        this.templateEngine.populateTemplateDefinition(
+                this.templateDefinitionMap,
                 this.tableDefinitionMap,
-                this.typeConvertMap);
+                this.typeConvertMap,
+                this.outputFileDefinitionMap);
     }
 
     protected void loadTemplates(GenArgs genArgs) throws Exception {
-        this.templateDefinitionList.addAll(templateEngine.loadTemplates(genArgs));
-        if (CollUtil.isEmpty(this.templateDefinitionList)) {
+        this.templateDefinitionMap.putAll(templateEngine.loadTemplates(genArgs));
+        if (CollUtil.isEmpty(this.templateDefinitionMap)) {
             throw new Exception("未加载模板文件");
         }
     }
@@ -213,7 +323,7 @@ public abstract class AbstractGenContext {
             throw new Exception("配置参数转换Bean失败");
         }
         // 初始化
-        genArgs.init(this.genArgsProperties);
+        this.genArgs.init(this.genArgsProperties);
 
         // 解析类型映射参数
         final Map<Object, Object> typeConvertHashMap = CollUtil.toMap(this.typeConvertProperties.entrySet());
@@ -224,6 +334,8 @@ public abstract class AbstractGenContext {
             // 放入集合元素
             this.putTypeConvertMap(k, typeConvertHashMap.get(k));
         }
+        // 赋值服务生成配置集合
+        this.serviceGenConfigMap.putAll(this.genArgs.getConvertData().getServiceGenConfigMap());
     }
 
     protected void loadDataBaseTableInfo(GenArgs genArgs) throws Exception {
@@ -239,7 +351,7 @@ public abstract class AbstractGenContext {
                     StrUtil.isNotBlank(tableDefinition.getFilterTableName()) ?
                             tableDefinition.getFilterTableName() :
                             tableDefinition.getTableName()));
-            for (ColumnDefinition columnDefinition : tableDefinition.getColumnDefinitionsList()) {
+            for (ColumnDefinition columnDefinition : tableDefinition.getColumnDefinitionList()) {
                 columnDefinition.setJavaFieldName(NamingCase.toPascalCase(
                         StrUtil.isNotBlank(columnDefinition.getFilterColumnName()) ?
                                 columnDefinition.getFilterColumnName() :
@@ -263,8 +375,8 @@ public abstract class AbstractGenContext {
                     StrUtil.isNotBlank(tableDefinition.getFilterTableName()) ?
                             tableDefinition.getFilterTableName() :
                             tableDefinition.getTableName()));
-            for (ColumnDefinition columnDefinition : tableDefinition.getColumnDefinitionsList()) {
-                columnDefinition.setJavaFieldName(NamingCase.toPascalCase(
+            for (ColumnDefinition columnDefinition : tableDefinition.getColumnDefinitionList()) {
+                columnDefinition.setJavaFieldName(NamingCase.toCamelCase(
                         StrUtil.isNotBlank(columnDefinition.getFilterColumnName()) ?
                                 columnDefinition.getFilterColumnName() :
                                 columnDefinition.getColumnName()));
@@ -273,26 +385,29 @@ public abstract class AbstractGenContext {
     }
 
     protected void populateColumnEnumConverter() throws Exception {
+        // 遍历
         for (String tableName : this.tableDefinitionMap.keySet()) {
             TableDefinition tableDefinition = this.tableDefinitionMap.get(tableName);
             // 校验参数
             JpValidationUtil.check(tableDefinition);
-            for (ColumnDefinition columnDefinition : tableDefinition.getColumnDefinitionsList()) {
+            // 遍历
+            for (ColumnDefinition columnDefinition : tableDefinition.getColumnDefinitionList()) {
                 String columnComment = columnDefinition.getColumnComment();
                 List<EnumDefinition> enumDefinitionList = buildEnumDefinitionList(columnComment);
                 columnDefinition.setEnumType(false);
                 if (CollUtil.isNotEmpty(enumDefinitionList)) {
-                    for (EnumDefinition enumDefinition : enumDefinitionList) {
+                    String javaEnumTypeName = NamingCase.toPascalCase(columnDefinition.getJavaFieldName()) + "Enum";
+                    columnDefinition.setJavaTypeName(javaEnumTypeName);
+                    if (NumberUtil.isNumber(columnDefinition.getDefaultValue())) {
                         // 填充枚举信息
-                        TemplateDefinition enumTemplateDefinition = this.templateDefinitionList.stream()
-                                .filter(n -> TemplateFileNameEnum.EntityP.name().equalsIgnoreCase(n.getTemplateFileName())).findFirst()
-                                .orElse(new TemplateDefinition());
-                        columnDefinition.setJavaTypeName(NamingCase.toPascalCase(columnDefinition.getJavaFieldName()) + "Enum");
-                        columnDefinition.setJavaTypePackage(enumTemplateDefinition.getBaseOutputFilePath());
-                        // TODO
-                        columnDefinition.setDefaultValue(null);
-                        columnDefinition.setEnumType(true);
+                        enumDefinitionList.stream()
+                                .filter(n -> n.getValue().equals(Integer.valueOf(columnDefinition.getDefaultValue())))
+                                .findFirst()
+                                .ifPresent(n -> columnDefinition.setDefaultValue(javaEnumTypeName + StrPool.DOT + n.getEnumName()));
                     }
+                    columnDefinition.setJavaTypePackage(Constant.Dao.BASE_PACKAGE + StrPool.DOT + Constant.ENUM_PACKAGE);
+                    columnDefinition.setEnumType(true);
+                    columnDefinition.setColumnCommentBrief(CharSequenceUtil.subBefore(columnComment, "（", false));
                     columnDefinition.setEnumDefinitionList(enumDefinitionList);
                 }
             }
@@ -306,9 +421,9 @@ public abstract class AbstractGenContext {
             int indexEnd = columnComment.indexOf("）");
             String enumValueStr = columnComment.substring(indexBegin + 1, indexEnd).trim();
             String[] split1 = enumValueStr.split("，");
-            for (int i = 0; i < split1.length; i++) {
+            for (String s : split1) {
                 EnumDefinition enumDefinition = new EnumDefinition();
-                String[] split2 = split1[i].split("、");
+                String[] split2 = s.split("、");
                 Integer value = Integer.valueOf(split2[0].trim());
                 enumDefinition.setValue(value);
                 String desc = split2[1].trim();

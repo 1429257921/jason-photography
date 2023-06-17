@@ -33,6 +33,11 @@ public class ColumnDefinition implements Serializable {
     @JpNotNull(message = "列注释为空")
     private String columnComment;
     /**
+     * 列注释简略
+     */
+    @JpNotNull(message = "列注释简略为空")
+    private String columnCommentBrief;
+    /**
      * 列类型长度
      */
     private Integer length;

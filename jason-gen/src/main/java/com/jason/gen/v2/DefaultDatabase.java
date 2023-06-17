@@ -47,7 +47,7 @@ public class DefaultDatabase extends AbstractDatabase {
                                        ConcurrentMap<String, String> tableCreateMap) throws Exception {
         for (String key : tableCreateMap.keySet()) {
             List<ColumnDefinition> columnDefinitionList = SqlDataDefinitionParse.parseColumnDefinition(tableCreateMap.get(key));
-            tableDefinitionMap.get(key).setColumnDefinitionsList(columnDefinitionList);
+            tableDefinitionMap.get(key).setColumnDefinitionList(columnDefinitionList);
         }
     }
 

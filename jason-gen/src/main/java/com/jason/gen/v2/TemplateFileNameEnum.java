@@ -1,5 +1,7 @@
 package com.jason.gen.v2;
 
+import java.util.Arrays;
+
 /**
  * TODO
  *
@@ -14,5 +16,9 @@ public enum TemplateFileNameEnum {
     EntityP,
     MapperP,
     MapperXmlP,
-    EnumP
+    EnumP;
+
+    public static TemplateFileNameEnum get(String templateFileName) {
+        return Arrays.stream(TemplateFileNameEnum.values()).filter(n -> n.name().equalsIgnoreCase(templateFileName)).findFirst().get();
+    }
 }
