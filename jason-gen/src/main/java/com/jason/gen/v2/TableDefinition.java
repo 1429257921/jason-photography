@@ -37,6 +37,4 @@ public class TableDefinition implements Serializable {
      * 当前表内的列定义信息数组
      */
     private List<ColumnDefinition> columnDefinitionList;
-
-
 }

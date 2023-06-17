@@ -30,7 +30,7 @@ public interface Constant {
     String ENTITY_PACKAGE = "entity.po";
     String MAPPER_PACKAGE = "mapper";
     String MAPPER_XML_PACKAGE = "mapper";
-    String ENUM_PACKAGE = "enum.po";
+    String ENUM_PACKAGE = "enums.db";
 
     interface Api {
         ServiceNameEnum SERVICE_NAME = ServiceNameEnum.API;

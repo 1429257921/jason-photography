@@ -185,7 +185,41 @@ public abstract class AbstractGenContext {
                     }
                 }
             }
+            this.buildOutputEnumFileDefinition(outputFileDefinitionList,
+                    serviceGenConfig,
+                    this.tableDefinitionMap.values().stream().findFirst().get());
             this.outputFileDefinitionMap.put(serviceNameEnum, outputFileDefinitionList);
+        }
+    }
+
+    private void buildOutputEnumFileDefinition(List<OutputFileDefinition> outputFileDefinitionList,
+                                               ServiceGenConfig serviceGenConfig,
+                                               TableDefinition tableDefinition) {
+        for (ColumnDefinition columnDefinition : tableDefinition.getColumnDefinitionList()) {
+            if (columnDefinition.getEnumType() && serviceGenConfig.getGenEnum()) {
+                String outputEnumFileName = CharSequenceUtil.upperFirst(columnDefinition.getJavaFieldName()) + "Enum";
+                for (OutputFileDefinition fileDefinition : outputFileDefinitionList) {
+                    if (fileDefinition.getOutputFileName().equals(outputEnumFileName)) {
+                        return;
+                    }
+                }
+                OutputFileDefinition outputEnumFileDefinition = new OutputFileDefinition();
+                TemplateDefinition templateDefinition = this.templateDefinitionMap.get(TemplateFileNameEnum.EnumP);
+                if (templateDefinition != null) {
+                    outputEnumFileDefinition.setTemplateDefinition(templateDefinition);
+                }
+                outputEnumFileDefinition.setOutputFileName(outputEnumFileName);
+                outputEnumFileDefinition.setFullOutputFileName(outputEnumFileName + StrPool.DOT + "java");
+                String baseOutputEnumFilePath = (String) ReflectUtil.getFieldValue(serviceGenConfig, "genEnumPath");
+                outputEnumFileDefinition.setBaseOutputFilePath(baseOutputEnumFilePath);
+                TemplatePopulateData populateData = new TemplatePopulateData();
+                populateData.setPackageEnum(serviceGenConfig.getPackageEnum());
+                populateData.setEnumClassName(outputEnumFileName);
+                populateData.setEnumColumnDefinition(columnDefinition);
+                outputEnumFileDefinition.setPopulateData(populateData);
+                outputFileDefinitionList.add(outputEnumFileDefinition);
+                System.out.println("");
+            }
         }
     }
 
@@ -214,6 +248,8 @@ public abstract class AbstractGenContext {
         if (templateDefinition != null) {
             outputFileDefinition.setTemplateDefinition(templateDefinition);
         }
+        // 获取java文件后缀
+        String javaClassNameSuffix = TemplateFileNameEnum.getJavaClassNameSuffix(TemplateFileNameEnum.get(templateFileName));
 
         TemplatePopulateData populateData = BeanUtil.copyProperties(tableDefinition, TemplatePopulateData.class);
         String tempTableName = StrUtil.isNotBlank(tableDefinition.getFilterTableName())
@@ -228,32 +264,12 @@ public abstract class AbstractGenContext {
         String baseOutputFilePackage = (String) ReflectUtil.getFieldValue(serviceGenConfig, populateDataFieldName);
         ReflectUtil.setFieldValue(populateData, populateDataFieldName, baseOutputFilePackage);
         String populateDataFieldName1 = CharSequenceUtil.lowerFirst(fieldName.replace("gen", "")) + "ClassName";
-        ReflectUtil.setFieldValue(populateData, populateDataFieldName1, tableDefinition.getJavaClassName());
+        String fullOutputFileName = tableDefinition.getJavaClassName() + javaClassNameSuffix;
+        ReflectUtil.setFieldValue(populateData, populateDataFieldName1, fullOutputFileName);
         outputFileDefinition.setPopulateData(populateData);
-        outputFileDefinitionList.add(outputFileDefinition);
+        if (!outputFileName.equalsIgnoreCase(tableDefinition.getJavaClassName() + "Enum")) {
+            outputFileDefinitionList.add(outputFileDefinition);
 
-        // 遍历枚举列
-        aaa:
-        for (ColumnDefinition columnDefinition : tableDefinition.getColumnDefinitionList()) {
-            if (columnDefinition.getEnumType()) {
-                for (OutputFileDefinition fileDefinition : outputFileDefinitionList) {
-                    ColumnDefinition enumColumnDefinition = fileDefinition.getPopulateData().getEnumColumnDefinition();
-                    if (enumColumnDefinition != null) {
-                        if (columnDefinition.getColumnName().equals(enumColumnDefinition.getColumnName())) {
-                            break aaa;
-                        }
-                    }
-                }
-                OutputFileDefinition outputEnumFileDefinition = new OutputFileDefinition();
-                BeanUtil.copyProperties(outputFileDefinition, outputEnumFileDefinition);
-                String outputEnumFileName = CharSequenceUtil.upperFirst(columnDefinition.getJavaFieldName()) + "Enum";
-                outputEnumFileDefinition.setOutputFileName(outputEnumFileName);
-                outputEnumFileDefinition.setFullOutputFileName(outputEnumFileName + StrPool.DOT + "java");
-                String baseOutputEnumFilePath = (String) ReflectUtil.getFieldValue(serviceGenConfig, "genEnumPath");
-                outputEnumFileDefinition.setBaseOutputFilePath(baseOutputEnumFilePath);
-                outputEnumFileDefinition.getPopulateData().setEnumColumnDefinition(columnDefinition);
-                outputFileDefinitionList.add(outputEnumFileDefinition);
-            }
         }
     }
 

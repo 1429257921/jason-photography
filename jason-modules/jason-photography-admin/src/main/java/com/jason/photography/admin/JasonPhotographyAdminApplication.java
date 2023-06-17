@@ -1,5 +1,6 @@
 package com.jason.photography.admin;
 
+import com.jason.photography.dao.enums.db.LoginStatusEnum;
 import lombok.extern.slf4j.Slf4j;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
@@ -19,6 +20,7 @@ import org.springframework.util.StringUtils;
 public class JasonPhotographyAdminApplication {
 
     public static void main(String[] args) {
+        Integer aaa = LoginStatusEnum.getValue("拉手机登录卡加斯");
         SpringApplication springApplication = new SpringApplication(JasonPhotographyAdminApplication.class);
         printConfigInfo(springApplication.run(args));
     }

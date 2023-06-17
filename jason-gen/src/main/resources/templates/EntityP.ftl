@@ -3,14 +3,13 @@ package ${packageEntity};
 import com.baomidou.mybatisplus.annotation.*;
 <#assign isGenEnum = "false">
 <#list columnDefinitionList as field>
-    <#if field.enumType == "true">
+    <#if field.enumType>
 		<#if isGenEnum == "false">
 import ${field.javaTypePackage}.*;
         <#assign isGenEnum = "true">
         </#if>
     </#if>
 </#list>
-
 
 import lombok.*;
 
@@ -22,17 +21,17 @@ import java.io.Serializable;
 <#list columnDefinitionList as field>
     <#if field.javaTypeName == "BigDecimal">
 		<#if isGenBigDecimal == "false">
-import ${javaTypePackage}.${javaTypeName};
+import ${field.javaTypePackage};
             <#assign isGenBigDecimal = "true">
 		</#if>
-	<#elseif field.javaTypeName = "LocalDateTime">
+	<#elseif field.javaTypeName == "LocalDateTime">
 		<#if isGenBigLocalDate == "false">
-import ${javaTypePackage}.${javaTypeName};
+import ${field.javaTypePackage};
 		</#if>
         <#assign isGenBigLocalDate = "true">
-	<#elseif field.javaTypeName = "LocalDate">
+	<#elseif field.javaTypeName == "LocalDate">
 		<#if isGenLocalDateTime == "false">
-import ${javaTypePackage}.${javaTypeName};
+import ${field.javaTypePackage};
         <#assign isGenLocalDateTime = "true">
         </#if>
     </#if>
@@ -87,7 +86,7 @@ public class ${entityClassName} implements Serializable {
     <#if field.columnName == "del_flag">
 	@TableField("${field.columnName}")
 	@TableLogic
-		<#if field.defaultValue== "" || field.defaultValue!>
+		<#if field.defaultValue!?? || field.defaultValue?string =="">
 	private ${field.javaTypeName} deleted;
             <#continue>
         </#if>

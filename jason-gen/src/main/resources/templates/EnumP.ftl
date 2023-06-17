@@ -1,26 +1,28 @@
 package ${packageEnum};
 
-import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.annotation.EnumValue;
 import com.baomidou.mybatisplus.annotation.IEnum;
 import com.fasterxml.jackson.annotation.JsonValue;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
+import java.util.Arrays;
+
 /**
- * ${tableName}表${enumColumnDefinition.columnCommentBrief!}枚举类
+ * ${enumColumnDefinition.columnCommentBrief!}枚举类
  *
  * @author ${author}
  * @since ${date}
  */
 @Getter
 @AllArgsConstructor
-public enum ${enumClassName} implements IEnum<Integer> {
+@SuppressWarnings("all")
+public enum ${enumColumnDefinition.javaTypeName} implements IEnum<Integer> {
     /**
      * ${enumColumnDefinition.columnCommentBrief!}
      **/
     <#list enumColumnDefinition.enumDefinitionList as enumValue>
-    ${enumValue.enumName}${enumValue?index}(${enumValue.value}, "${enumValue.desc}"),
+    ${enumValue.enumName}(${enumValue.value}, "${enumValue.desc}"),
     </#list>
     ;
     @EnumValue
@@ -28,21 +30,21 @@ public enum ${enumClassName} implements IEnum<Integer> {
     private final Integer value;
     private final String desc;
 
-    public static ${enumFileName} getEnum(Integer value) {
-        return Arrays.stream(${enumClassName}.values()).filter(valueEnum -> valueEnum.getValue().equals(value)).findFirst().get();
+    public static ${enumColumnDefinition.javaTypeName} getEnum(Integer value) {
+        return Arrays.stream(${enumColumnDefinition.javaTypeName}.values()).filter(valueEnum -> valueEnum.getValue().equals(value)).findFirst().orElse(null);
     }
 
-    public static ${enumFileName} getEnum(String desc) {
-        return Arrays.stream(${enumClassName}.values()).filter(valueEnum -> valueEnum.getDesc().equals(desc)).findFirst().get();
+    public static ${enumColumnDefinition.javaTypeName} getEnum(String desc) {
+        return Arrays.stream(${enumColumnDefinition.javaTypeName}.values()).filter(valueEnum -> valueEnum.getDesc().equals(desc)).findFirst().orElse(null);
     }
 
     public static String getDesc(Integer value) {
-        ${enumFileName} enumValue = getEnum(value);
+        ${enumColumnDefinition.javaTypeName} enumValue = getEnum(value);
         return enumValue != null ? enumValue.getDesc() : "";
     }
 
     public static Integer getValue(String desc) {
-        ${enumFileName} enumValue = getEnum(desc);
+        ${enumColumnDefinition.javaTypeName} enumValue = getEnum(desc);
         return enumValue != null ? enumValue.getValue() : null;
     }
 }

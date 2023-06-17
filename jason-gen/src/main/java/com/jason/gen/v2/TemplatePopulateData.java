@@ -1,8 +1,7 @@
 package com.jason.gen.v2;
 
 import lombok.Data;
-
-import java.util.List;
+import lombok.EqualsAndHashCode;
 
 /**
  * TODO
@@ -11,6 +10,7 @@ import java.util.List;
  * @since 2023/6/14
  **/
 @Data
+@EqualsAndHashCode(callSuper = true)
 public class TemplatePopulateData extends TableDefinition {
 
     private String moduleName;
