@@ -1,8 +1,11 @@
-package com.jason.gen.v2;
+package com.jason.gen.service;
 
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
+import com.jason.gen.entity.ColumnDefinition;
+import com.jason.gen.entity.GenArgs;
+import com.jason.gen.entity.TableDefinition;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -27,40 +30,68 @@ import java.util.concurrent.ConcurrentMap;
  * @since 2023/6/13
  **/
 public abstract class AbstractDatabase {
-
+    /**
+     * 数据库连接对象
+     */
     protected Connection connection;
+    /**
+     * 表DDL文本集合
+     */
+    protected final ConcurrentMap<String, String> tableCreateMap = new ConcurrentHashMap<>(16);
+    /**
+     * 表定义信息集合
+     */
+    protected final ConcurrentMap<String, TableDefinition> tableDefinitionMap = new ConcurrentHashMap<>(16);
 
-    protected ConcurrentMap<String, String> tableCreateMap = new ConcurrentHashMap<>(16);
-
-    protected ConcurrentMap<String, TableDefinition> tableDefinitionMap = new ConcurrentHashMap<>(16);
-
+    /**
+     * 初始化
+     *
+     * @param genArgs 生成器配置参数对象
+     * @return 表定义信息集合
+     * @throws Exception 数据库异常
+     */
     public ConcurrentMap<String, TableDefinition> init(GenArgs genArgs) throws Exception {
-        // 校验驱动类是否存在
-        this.check(genArgs.getDatabaseDriverClassName());
+        // 加载数据库驱动类
+        this.loadDriver(genArgs.getDatabaseDriverClassName());
         // 获取连接
         this.getConnection(genArgs);
         try {
+            // 获取需要生成的表名称集合
             GenArgs.ConvertData convertData = genArgs.getConvertData();
             for (String tableName : convertData.getTableList()) {
                 // 加载表创建信息(DDL文本)
-                loadTableCreateSqlText(tableName, connection, tableCreateMap);
+                this.loadTableCreateSqlText(tableName, connection, tableCreateMap);
                 // 获取表定义
                 this.getTableDefinition(tableName, this.tableDefinitionMap, this.tableCreateMap);
                 // 获取列定义
                 this.getColumnDefinition(tableName, this.tableDefinitionMap, this.tableCreateMap);
             }
-        } catch (Exception e) {
-            e.printStackTrace();
         } finally {
             this.closeConnection();
         }
         return this.tableDefinitionMap;
     }
 
+    /**
+     * 加载表DDL文本
+     *
+     * @param tableName      表名称
+     * @param connection     数据库连接对象
+     * @param tableCreateMap 表DDL文本集合
+     * @throws SQLException sql异常
+     */
     protected void loadTableCreateSqlText(String tableName, Connection connection, ConcurrentMap<String, String> tableCreateMap) throws SQLException {
-        // 如需使用请重写
+        // 如有需要请重写
     }
 
+    /**
+     * 获取表定义信息
+     *
+     * @param tableName          表名称
+     * @param tableDefinitionMap 表定义信息集合
+     * @param tableCreateMap     表DDL文本集合
+     * @throws Exception 异常
+     */
     protected void getTableDefinition(String tableName,
                                       ConcurrentMap<String, TableDefinition> tableDefinitionMap,
                                       ConcurrentMap<String, String> tableCreateMap) throws Exception {
@@ -86,6 +117,14 @@ public abstract class AbstractDatabase {
         }
     }
 
+    /**
+     * 获取列定义信息
+     *
+     * @param tableName          表名称
+     * @param tableDefinitionMap 表定义信息集合
+     * @param tableCreateMap     表DDL文本集合
+     * @throws Exception 异常
+     */
     protected void getColumnDefinition(String tableName,
                                        ConcurrentMap<String, TableDefinition> tableDefinitionMap,
                                        ConcurrentMap<String, String> tableCreateMap) throws Exception {
@@ -121,6 +160,12 @@ public abstract class AbstractDatabase {
         tableDefinition.setColumnDefinitionList(columnDefinitionList);
     }
 
+    /**
+     * 获取数据库连接
+     *
+     * @param genArgs 生成器配置参数对象
+     * @throws Exception 异常
+     */
     protected void getConnection(GenArgs genArgs) throws Exception {
         try {
             System.out.println("数据库连接中...");
@@ -134,6 +179,11 @@ public abstract class AbstractDatabase {
         System.out.println("数据库已连接");
     }
 
+    /**
+     * 关闭数据库连接
+     *
+     * @throws Exception 异常
+     */
     protected void closeConnection() throws Exception {
         try {
             if (connection != null) {
@@ -144,11 +194,17 @@ public abstract class AbstractDatabase {
         }
     }
 
-    private void check(String driverClassName) throws Exception {
+    /**
+     * 加载驱动类
+     *
+     * @param driverClassPackage 驱动类包路径
+     * @throws Exception 加载失败异常
+     */
+    private void loadDriver(String driverClassPackage) throws Exception {
         try {
-            Class.forName(driverClassName);
+            Class.forName(driverClassPackage);
         } catch (ClassNotFoundException e) {
-            throw new Exception("未找到JDBC驱动类->" + driverClassName);
+            throw new Exception("未找到JDBC驱动类->" + driverClassPackage);
         }
     }
 

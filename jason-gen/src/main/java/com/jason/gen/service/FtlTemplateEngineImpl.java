@@ -1,11 +1,14 @@
-package com.jason.gen.v2;
+package com.jason.gen.service;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.bean.copier.CopyOptions;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.StrUtil;
-import cn.hutool.json.JSONUtil;
+import com.jason.gen.constant.Constant;
+import com.jason.gen.entity.*;
+import com.jason.gen.enums.ServiceNameEnum;
+import com.jason.gen.enums.TemplateFileNameEnum;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import org.jetbrains.annotations.NotNull;
@@ -18,21 +21,13 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 /**
- * TODO
+ * freemarker模板引擎实现类
  *
  * @author guozhongcheng
  * @since 2023/6/14
  **/
 public class FtlTemplateEngineImpl implements TemplateEngine {
 
-
-    /**
-     * 构建需要
-     *
-     * @param genArgs 生成器配置参数对象
-     * @return
-     * @throws Exception
-     */
     @Override
     public ConcurrentMap<TemplateFileNameEnum, TemplateDefinition> loadTemplates(@NotNull GenArgs genArgs) throws Exception {
         ConcurrentMap<TemplateFileNameEnum, TemplateDefinition> templateDefinitionMap = new ConcurrentHashMap<>(16);
@@ -54,46 +49,47 @@ public class FtlTemplateEngineImpl implements TemplateEngine {
     }
 
     /**
-     * 主要填充
+     * 填充将需要共用的数据进行互相填充
      *
-     * @param templateDefinitionMap 模板定义对象数组
-     * @param tableDefinitionMap
-     * @param typeConvertMap
-     * @throws Exception
+     * @param templateDefinitionMap   模板定义对象数组
+     * @param tableDefinitionMap      表定义信息集合
+     * @param typeConvertMap          类型转换信息集合
+     * @param outputFileDefinitionMap 输出文件定义信息集合
      */
     @Override
-    public void populateTemplateDefinition(@NotNull ConcurrentMap<TemplateFileNameEnum, TemplateDefinition> templateDefinitionMap, @NotNull ConcurrentMap<String, TableDefinition> tableDefinitionMap, @NotNull ConcurrentMap<String, TypeConvertDefinition> typeConvertMap, @NotNull ConcurrentMap<ServiceNameEnum, List<OutputFileDefinition>> outputFileDefinitionMap) throws Exception {
-
-        TemplatePopulateData commonTemplatePopulateData = null;
+    public void populateTemplateDefinition(@NotNull ConcurrentMap<TemplateFileNameEnum, TemplateDefinition> templateDefinitionMap, @NotNull ConcurrentMap<String, TableDefinition> tableDefinitionMap, @NotNull ConcurrentMap<String, TypeConvertDefinition> typeConvertMap, @NotNull ConcurrentMap<ServiceNameEnum, List<OutputFileDefinition>> outputFileDefinitionMap) {
+        TemplatePlaceholderData commonTemplatePlaceholderData = null;
         for (List<OutputFileDefinition> outputFileDefinitionList : outputFileDefinitionMap.values()) {
             for (OutputFileDefinition outputFileDefinition : outputFileDefinitionList) {
-                TemplatePopulateData populateData = outputFileDefinition.getPopulateData();
-                if (commonTemplatePopulateData == null) {
-                    commonTemplatePopulateData = populateData;
+                TemplatePlaceholderData populateData = outputFileDefinition.getPopulateData();
+                if (commonTemplatePlaceholderData == null) {
+                    commonTemplatePlaceholderData = populateData;
                 }
                 CopyOptions copyOptions = CopyOptions.create().setOverride(false);
                 copyOptions.setIgnoreProperties("enumClassName", "packageEnum", "enumColumnDefinition");
-                BeanUtil.copyProperties(populateData, commonTemplatePopulateData, copyOptions);
+                BeanUtil.copyProperties(populateData, commonTemplatePlaceholderData, copyOptions);
             }
         }
         // 填充完整数据
-        if (commonTemplatePopulateData != null) {
+        if (commonTemplatePlaceholderData != null) {
             for (List<OutputFileDefinition> outputFileDefinitionList : outputFileDefinitionMap.values()) {
                 for (OutputFileDefinition outputFileDefinition : outputFileDefinitionList) {
-                    TemplatePopulateData tempCommonTemplatePopulateData = BeanUtil.copyProperties(commonTemplatePopulateData, TemplatePopulateData.class,"enumClassName", "packageEnum", "enumColumnDefinition");
-                    TemplatePopulateData populateData = outputFileDefinition.getPopulateData();
-                    tempCommonTemplatePopulateData.setPackageEnum(populateData.getPackageEnum());
-                    tempCommonTemplatePopulateData.setEnumClassName(populateData.getEnumClassName());
-                    tempCommonTemplatePopulateData.setEnumColumnDefinition(populateData.getEnumColumnDefinition());
-                    outputFileDefinition.setPopulateData(tempCommonTemplatePopulateData);
+                    TemplatePlaceholderData tempCommonTemplatePlaceholderData = BeanUtil.copyProperties(commonTemplatePlaceholderData, TemplatePlaceholderData.class, "enumClassName", "packageEnum", "enumColumnDefinition");
+                    TemplatePlaceholderData populateData = outputFileDefinition.getPopulateData();
+                    tempCommonTemplatePlaceholderData.setPackageEnum(populateData.getPackageEnum());
+                    tempCommonTemplatePlaceholderData.setEnumClassName(populateData.getEnumClassName());
+                    tempCommonTemplatePlaceholderData.setEnumColumnDefinition(populateData.getEnumColumnDefinition());
+                    outputFileDefinition.setPopulateData(tempCommonTemplatePlaceholderData);
                 }
             }
         }
     }
 
     @Override
-    public void outputFile(@NotNull GenArgs genArgs, @NotNull ConcurrentMap<ServiceNameEnum, List<OutputFileDefinition>> outputFileDefinitionMap) throws Exception {
+    public void outputFile(@NotNull GenArgs genArgs, @NotNull ConcurrentMap<ServiceNameEnum, List<OutputFileDefinition>> outputFileDefinitionMap) {
+        // 生成成功的文件完整磁盘路径
         List<String> alreadyGenFilePathList = new ArrayList<>(32);
+        // 是否生成失败
         boolean isError = false;
         // 遍历模块
         outermost:
@@ -122,7 +118,7 @@ public class FtlTemplateEngineImpl implements TemplateEngine {
                     // 获取写入缓存流
                     BufferedWriter bufferedWriter = FileUtil.getWriter(fullOutputFilePath, Constant.CHARSET, true);
                     // 执行程序
-                    TemplatePopulateData populateData = outputFileDefinition.getPopulateData();
+                    TemplatePlaceholderData populateData = outputFileDefinition.getPopulateData();
                     alreadyGenFilePathList.add(fullOutputFilePath);
                     System.out.println("模块名->" + populateData.getModuleName() + "，文件名->" + fullOutputFilePath + "正在生成...");
                     template.process(populateData, bufferedWriter);
@@ -135,6 +131,7 @@ public class FtlTemplateEngineImpl implements TemplateEngine {
                 }
             }
         }
+        // 如果有一个文件生成失败，则删除所有已经生成的文件
         if (isError) {
             ThreadUtil.sleep(1000);
             for (String alreadyGenFilePath : alreadyGenFilePathList) {

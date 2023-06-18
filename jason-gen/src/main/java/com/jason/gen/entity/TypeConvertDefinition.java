@@ -1,11 +1,11 @@
-package com.jason.gen.v2;
+package com.jason.gen.entity;
 
 import lombok.Data;
 
 import java.io.Serializable;
 
 /**
- * TODO
+ * 数据库列类型映射Java类型定义信息，主要作用是保存type-converter.properties配置文件的信息
  *
  * @author guozhongcheng
  * @since 2023/6/13

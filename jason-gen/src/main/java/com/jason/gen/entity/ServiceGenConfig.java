@@ -1,4 +1,4 @@
-package com.jason.gen.v2;
+package com.jason.gen.entity;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 import java.io.Serializable;
 
 /**
- * TODO
+ * 模块服务生成配置信息，主要保存每个模块服务需要生成哪些文件
  *
  * @author guozhongcheng
  * @since 2023/6/14

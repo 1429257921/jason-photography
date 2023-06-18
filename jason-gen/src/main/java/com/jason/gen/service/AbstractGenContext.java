@@ -1,4 +1,4 @@
-package com.jason.gen.v2;
+package com.jason.gen.service;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
@@ -11,6 +11,12 @@ import cn.hutool.core.util.NumberUtil;
 import cn.hutool.core.util.ReflectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.pinyin.PinyinUtil;
+import com.jason.gen.constant.Constant;
+import com.jason.gen.entity.*;
+import com.jason.gen.enums.ServiceNameEnum;
+import com.jason.gen.enums.TemplateFileNameEnum;
+import com.jason.gen.util.GenCommonUtil;
+import com.jason.gen.util.JpValidationUtil;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -23,7 +29,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 /**
- * 上下文
+ * 代码生成上下文
+ * 主要使用模板方法设计模式，run()方法作为整个代码生成的业务逻辑流程入口
  *
  * @author guozhongcheng
  * @since 2023/6/13
@@ -83,11 +90,11 @@ public abstract class AbstractGenContext {
     protected final ConcurrentMap<ServiceNameEnum, List<OutputFileDefinition>> outputFileDefinitionMap = new ConcurrentHashMap<>(32);
 
     /**
-     * 构建
+     * 运行
      */
-    public void build() throws Exception {
-        // 准备构建
-        prepareBuild();
+    public void run() throws Exception {
+        // 准备运行
+        prepareRun();
 
         // 加载配置文件
         loadConfiguration();
@@ -119,8 +126,8 @@ public abstract class AbstractGenContext {
         // 构建输出文件定义信息
         buildOutputFileDefinition();
 
-        // 填充模板数据
-        populateTemplatePopulateData();
+        // 填充模板占位符数据
+        populateTemplatePlaceholderData();
 
         // 代码生成前最好一次调整机会
         lastAdjustment();
@@ -132,6 +139,12 @@ public abstract class AbstractGenContext {
         executeCodeGeneration();
     }
 
+    /**
+     * 过滤表名称前缀
+     *
+     * @param filterTableNamePrefixList 过滤表名称前缀字符信息集合
+     * @param tableDefinitionMap        表定义信息集合
+     */
     protected void filterTableNamePrefix(List<String> filterTableNamePrefixList, ConcurrentMap<String, TableDefinition> tableDefinitionMap) {
         if (CollUtil.isNotEmpty(filterTableNamePrefixList)) {
             for (String filterTableNamePrefix : filterTableNamePrefixList) {
@@ -146,6 +159,12 @@ public abstract class AbstractGenContext {
         }
     }
 
+    /**
+     * 过滤列名称前缀
+     *
+     * @param columnTableNamePrefixList 过滤列名称前缀字符信息集合
+     * @param tableDefinitionMap        表定义信息集合
+     */
     protected void filterColumnNamePrefix(List<String> columnTableNamePrefixList, ConcurrentMap<String, TableDefinition> tableDefinitionMap) {
         if (CollUtil.isNotEmpty(columnTableNamePrefixList)) {
             for (String columnTableNamePrefix : columnTableNamePrefixList) {
@@ -164,7 +183,7 @@ public abstract class AbstractGenContext {
     }
 
     /**
-     * 核心
+     * 构建输出文件定义信息（核心）
      */
     protected void buildOutputFileDefinition() throws Exception {
         for (ServiceNameEnum serviceNameEnum : this.serviceGenConfigMap.keySet()) {
@@ -187,11 +206,18 @@ public abstract class AbstractGenContext {
             }
             this.buildOutputEnumFileDefinition(outputFileDefinitionList,
                     serviceGenConfig,
-                    this.tableDefinitionMap.values().stream().findFirst().get());
+                    this.tableDefinitionMap.values().stream().findFirst().orElse(new TableDefinition()));
             this.outputFileDefinitionMap.put(serviceNameEnum, outputFileDefinitionList);
         }
     }
 
+    /**
+     * 构建输出枚举文件定义信息
+     *
+     * @param outputFileDefinitionList 输出文件定义信息集合
+     * @param serviceGenConfig         模块服务生成配置
+     * @param tableDefinition          表定义信息
+     */
     private void buildOutputEnumFileDefinition(List<OutputFileDefinition> outputFileDefinitionList,
                                                ServiceGenConfig serviceGenConfig,
                                                TableDefinition tableDefinition) {
@@ -212,13 +238,12 @@ public abstract class AbstractGenContext {
                 outputEnumFileDefinition.setFullOutputFileName(outputEnumFileName + StrPool.DOT + "java");
                 String baseOutputEnumFilePath = (String) ReflectUtil.getFieldValue(serviceGenConfig, "genEnumPath");
                 outputEnumFileDefinition.setBaseOutputFilePath(baseOutputEnumFilePath);
-                TemplatePopulateData populateData = new TemplatePopulateData();
+                TemplatePlaceholderData populateData = new TemplatePlaceholderData();
                 populateData.setPackageEnum(serviceGenConfig.getPackageEnum());
                 populateData.setEnumClassName(outputEnumFileName);
                 populateData.setEnumColumnDefinition(columnDefinition);
                 outputEnumFileDefinition.setPopulateData(populateData);
                 outputFileDefinitionList.add(outputEnumFileDefinition);
-                System.out.println("");
             }
         }
     }
@@ -251,7 +276,7 @@ public abstract class AbstractGenContext {
         // 获取java文件后缀
         String javaClassNameSuffix = TemplateFileNameEnum.getJavaClassNameSuffix(TemplateFileNameEnum.get(templateFileName));
 
-        TemplatePopulateData populateData = BeanUtil.copyProperties(tableDefinition, TemplatePopulateData.class);
+        TemplatePlaceholderData populateData = BeanUtil.copyProperties(tableDefinition, TemplatePlaceholderData.class);
         String tempTableName = StrUtil.isNotBlank(tableDefinition.getFilterTableName())
                 ? tableDefinition.getFilterTableName()
                 : tableDefinition.getTableName();
@@ -273,6 +298,13 @@ public abstract class AbstractGenContext {
         }
     }
 
+    /**
+     * 转换文件名称后缀
+     *
+     * @param tableJavaClassName 表名称映射的文件名称
+     * @param fieldName          属性名称
+     * @return 输出文件名称
+     */
     private String convertFileNameSuffix(String tableJavaClassName, String fieldName) {
         String fileNameSuffix = switch (fieldName) {
             case "genController" -> "Controller";
@@ -286,19 +318,35 @@ public abstract class AbstractGenContext {
         return tableJavaClassName + fileNameSuffix;
     }
 
-    private void lastAdjustment() {
-
+    /**
+     * 代码生成前最好一次调整机会
+     */
+    protected void lastAdjustment() {
+        // 如需使用，请重写
     }
 
+    /**
+     * 执行代码生成
+     *
+     * @throws Exception 异常
+     */
     protected void executeCodeGeneration() throws Exception {
         templateEngine.outputFile(this.genArgs, this.outputFileDefinitionMap);
     }
 
+    /**
+     * 代码生成前最后一次校验
+     */
     protected void lastCheck() {
-//        CollUtil.isEmpty(this.templateDefinitionList);
+        // 如需使用，请重写
     }
 
-    protected void populateTemplatePopulateData() throws Exception {
+    /**
+     * 填充模板占位符数据
+     *
+     * @throws Exception 异常
+     */
+    protected void populateTemplatePlaceholderData() throws Exception {
         this.templateEngine.populateTemplateDefinition(
                 this.templateDefinitionMap,
                 this.tableDefinitionMap,
@@ -306,6 +354,12 @@ public abstract class AbstractGenContext {
                 this.outputFileDefinitionMap);
     }
 
+    /**
+     * 加载模板定义信息
+     *
+     * @param genArgs 生成器配置参数
+     * @throws Exception 异常
+     */
     protected void loadTemplates(GenArgs genArgs) throws Exception {
         this.templateDefinitionMap.putAll(templateEngine.loadTemplates(genArgs));
         if (CollUtil.isEmpty(this.templateDefinitionMap)) {
@@ -313,12 +367,22 @@ public abstract class AbstractGenContext {
         }
     }
 
-    protected void prepareBuild() {
-        // 嘿嘿嘿
+    /**
+     * 准备运行（前置扩展点）
+     */
+    protected void prepareRun() {
+        // 如需使用，请重写
     }
 
+    /**
+     * 加载配置文件中的信息
+     *
+     * @throws Exception 异常
+     */
     protected void loadConfiguration() throws Exception {
+        // 加载生成器配置参数
         this.genArgsProperties = loadProperties(GEN_ARGS_PROPERTIES_FILE_NAME);
+        // 加载类型转换参数
         this.typeConvertProperties = loadProperties(TYPE_CONVERT_PROPERTIES_FILE_NAME);
         if (this.genArgsProperties.isEmpty()) {
             throw new Exception("加载" + GEN_ARGS_PROPERTIES_FILE_NAME + "文件失败");
@@ -328,8 +392,13 @@ public abstract class AbstractGenContext {
         }
     }
 
+    /**
+     * 解析配置参数信息
+     *
+     * @throws Exception 解析异常
+     */
     protected void parseConfiguration() throws Exception {
-        // 解析生成器配置
+        // 解析生成器配置信息
         Map<Object, Object> genArgsMap = CollUtil.toMap(this.genArgsProperties.entrySet());
         if (CollUtil.isEmpty(genArgsMap)) {
             throw new Exception("配置参数转换Map失败");
@@ -354,11 +423,20 @@ public abstract class AbstractGenContext {
         this.serviceGenConfigMap.putAll(this.genArgs.getConvertData().getServiceGenConfigMap());
     }
 
+    /**
+     * 加载数据库表定义信息
+     *
+     * @param genArgs 生成器配置参数
+     * @throws Exception 异常
+     */
     protected void loadDataBaseTableInfo(GenArgs genArgs) throws Exception {
         ConcurrentMap<String, TableDefinition> tableDefinitionConcurrentMap = abstractDatabase.init(genArgs);
         this.tableDefinitionMap.putAll(tableDefinitionConcurrentMap);
     }
 
+    /**
+     * 填充列类型映射
+     */
     protected void populateColumnTypeConverter() {
         for (String tableName : this.tableDefinitionMap.keySet()) {
             TableDefinition tableDefinition = this.tableDefinitionMap.get(tableName);
@@ -372,6 +450,7 @@ public abstract class AbstractGenContext {
                         StrUtil.isNotBlank(columnDefinition.getFilterColumnName()) ?
                                 columnDefinition.getFilterColumnName() :
                                 columnDefinition.getColumnName()));
+                // 数据库列类型映射Java类型
                 this.typeConvertMap.forEach((k, v) -> {
                     String jdbcTypeName = columnDefinition.getJdbcTypeName();
                     if (jdbcTypeName.equalsIgnoreCase(k)) {
@@ -383,6 +462,9 @@ public abstract class AbstractGenContext {
         }
     }
 
+    /**
+     * 对表名称和列名称进行转换，然后进行填充
+     */
     private void populateTableNameAndColumnNameConverter() {
         for (String tableName : this.tableDefinitionMap.keySet()) {
             TableDefinition tableDefinition = this.tableDefinitionMap.get(tableName);
@@ -400,6 +482,11 @@ public abstract class AbstractGenContext {
         }
     }
 
+    /**
+     * 对列枚举进行转换，然后填充
+     *
+     * @throws Exception 异常
+     */
     protected void populateColumnEnumConverter() throws Exception {
         // 遍历
         for (String tableName : this.tableDefinitionMap.keySet()) {
@@ -430,9 +517,15 @@ public abstract class AbstractGenContext {
         }
     }
 
+    /**
+     * 构建枚举定义信息集合
+     *
+     * @param columnComment 枚举列注释
+     * @return 枚举定义信息集合
+     */
     private static List<EnumDefinition> buildEnumDefinitionList(String columnComment) {
         List<EnumDefinition> enumDefinitionList = new ArrayList<>(16);
-        if (isEnumField(columnComment)) {
+        if (GenCommonUtil.isEnumField(columnComment)) {
             int indexBegin = columnComment.indexOf("（");
             int indexEnd = columnComment.indexOf("）");
             String enumValueStr = columnComment.substring(indexBegin + 1, indexEnd).trim();
@@ -449,13 +542,6 @@ public abstract class AbstractGenContext {
             }
         }
         return enumDefinitionList;
-    }
-
-    private static boolean isEnumField(String remarks) {
-        if (remarks.contains("状态") || remarks.contains("类型") || remarks.contains("删除标志")) {
-            return remarks.contains("（") && remarks.contains("）");
-        }
-        return false;
     }
 
     /**

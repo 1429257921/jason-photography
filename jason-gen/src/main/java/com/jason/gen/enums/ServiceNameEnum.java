@@ -1,9 +1,9 @@
-package com.jason.gen.v2;
+package com.jason.gen.enums;
 
 import java.util.Arrays;
 
 /**
- * 服务名称枚举类
+ * 服务名称
  *
  * @author guozhongcheng
  * @since 2023/6/14

@@ -11,7 +11,7 @@ import java.io.Serializable;
  * @since 2023/6/10
  **/
 @Data
-public class EnumValue implements Serializable {
+public class EnumDefinition implements Serializable {
     /**
      * 枚举名称
      */

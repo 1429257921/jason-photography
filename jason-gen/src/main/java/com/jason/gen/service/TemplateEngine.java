@@ -1,5 +1,8 @@
-package com.jason.gen.v2;
+package com.jason.gen.service;
 
+import com.jason.gen.entity.*;
+import com.jason.gen.enums.ServiceNameEnum;
+import com.jason.gen.enums.TemplateFileNameEnum;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -27,9 +30,9 @@ public interface TemplateEngine {
      * 填充模板定义参数
      *
      * @param templateDefinitionMap   模板定义对象数组
-     * @param tableDefinitionMap
-     * @param typeConvertMap
-     * @param outputFileDefinitionMap
+     * @param tableDefinitionMap      表定义信息集合
+     * @param typeConvertMap          类型转换信息集合
+     * @param outputFileDefinitionMap 输出文件定义信息集合
      * @throws Exception 异常
      */
     void populateTemplateDefinition(@NotNull ConcurrentMap<TemplateFileNameEnum, TemplateDefinition> templateDefinitionMap,
@@ -40,7 +43,7 @@ public interface TemplateEngine {
     /**
      * 输出文件
      *
-     * @param genArgs 模板定义对象数组
+     * @param genArgs                 模板定义对象数组
      * @param outputFileDefinitionMap 模板定义对象数组
      * @throws Exception 异常
      */

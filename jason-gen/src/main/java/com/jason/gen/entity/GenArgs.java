@@ -1,8 +1,10 @@
-package com.jason.gen.v2;
+package com.jason.gen.entity;
 
 import cn.hutool.core.text.StrPool;
 import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.StrUtil;
+import com.jason.gen.constant.Constant;
+import com.jason.gen.enums.ServiceNameEnum;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -14,32 +16,88 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 /**
- * 生成器参数配置
+ * 生成器参数配置，主要用于映射genPhotography.properties配置文件的配置信息
  *
  * @author guozhongcheng
  * @since 2023/6/13
  **/
 @Data
 public class GenArgs implements Serializable {
-
+    /**
+     * 项目基础路径
+     */
     private String projectPath;
+    /**
+     * 需要生成的模块名称（多个用逗号分割）
+     */
     private String modules;
+    /**
+     * 作者名称
+     */
     private String author;
+    /**
+     * 需要生成的表名称（多个用逗号分割）
+     */
     private String tables;
+    /**
+     * 需要过滤的表名称前缀（多个用逗号分割）
+     */
     private String filterTableNamePrefix;
+    /**
+     * 需要过滤的列名称前缀（多个用逗号分割）
+     */
     private String filterColumnNamePrefix;
+    /**
+     * 是否覆盖原文件
+     */
     private Boolean overwriteFile;
+    /**
+     * 数据库驱动类包路径
+     */
     private String databaseDriverClassName;
+    /**
+     * 数据库连接URL
+     */
     private String databaseUrl;
+    /**
+     * 数据库账号
+     */
     private String databaseUsername;
+    /**
+     * 数据库密码
+     */
     private String databasePassword;
+    /**
+     * 需要生成Controller类的模块名称（多个用逗号分割）
+     */
     private String genController;
+    /**
+     * 需要生成Service类的模块名称（多个用逗号分割）
+     */
     private String genService;
+    /**
+     * 需要生成Service实现类的模块名称（多个用逗号分割）
+     */
     private String genServiceImpl;
+    /**
+     * 需要生成表实体类的模块名称（多个用逗号分割）
+     */
     private String genEntity;
+    /**
+     * 需要生成Mapper接口的模块名称（多个用逗号分割）
+     */
     private String genMapper;
+    /**
+     * 需要生成MapperXml的模块名称（多个用逗号分割）
+     */
     private String genMapperXml;
+    /**
+     * 需要生成枚举类的模块名称（多个用逗号分割）
+     */
     private String genEnum;
+    /**
+     * 转换数据
+     */
     private ConvertData convertData;
 
     @Data
@@ -68,7 +126,7 @@ public class GenArgs implements Serializable {
     }
 
     /**
-     * 二次初始化
+     * 初始化当前对象属性
      *
      * @param properties 配置参数对象
      */
@@ -97,7 +155,7 @@ public class GenArgs implements Serializable {
 
 
     /**
-     * 初始化转换器
+     * 初始化转换器对象
      */
     private void initConvertData() throws Exception {
         ConvertData initConvertData = new ConvertData();
@@ -119,6 +177,7 @@ public class GenArgs implements Serializable {
     /**
      * 填充生成的类的文件路径
      */
+    @SuppressWarnings("all")
     private void populateGenFilePath(ServiceNameEnum serviceNameEnum, ServiceGenConfig serviceGenConfig) {
         if (Constant.Api.SERVICE_NAME == serviceNameEnum) {
             if (serviceGenConfig.getGenController()) {
@@ -212,7 +271,7 @@ public class GenArgs implements Serializable {
     /**
      * 获取服务生成配置对象
      *
-     * @param module 模块名
+     * @param module 模块名称
      * @return 服务生成配置对象
      */
     private ServiceGenConfig getServiceGenConfig(String module) {
@@ -256,9 +315,7 @@ public class GenArgs implements Serializable {
             String[] split = params.split(StrPool.COMMA);
             if (ArrayUtil.isNotEmpty(split)) {
                 String filterResult = Arrays.stream(split).filter(n -> n.equalsIgnoreCase(param)).findFirst().orElse(null);
-                if (StrUtil.isNotBlank(filterResult)) {
-                    return true;
-                }
+                return StrUtil.isNotBlank(filterResult);
             }
         }
         return false;

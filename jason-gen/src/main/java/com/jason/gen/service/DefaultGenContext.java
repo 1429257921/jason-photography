@@ -1,24 +1,25 @@
-package com.jason.gen.v2;
+package com.jason.gen.service;
+
+import com.jason.gen.entity.GenArgs;
 
 /**
- * TODO
+ * 默认生成器上下文容器实现类
  *
  * @author guozhongcheng
  * @since 2023/6/13
  **/
 public class DefaultGenContext extends AbstractGenContext {
 
+    /**
+     * 注入默认数据库引擎和Freemarker模板引擎
+     */
     public DefaultGenContext() {
         super(new DefaultDatabase(), new FtlTemplateEngineImpl());
     }
 
-    public DefaultGenContext(AbstractDatabase abstractDatabase, TemplateEngine templateEngine) {
-        super(abstractDatabase, templateEngine);
-    }
-
     @Override
-    public void build() throws Exception {
-        super.build();
+    public void run() throws Exception {
+        super.run();
     }
 
     @Override
@@ -32,8 +33,8 @@ public class DefaultGenContext extends AbstractGenContext {
     }
 
     @Override
-    protected void populateTemplatePopulateData() throws Exception {
-        super.populateTemplatePopulateData();
+    protected void populateTemplatePlaceholderData() throws Exception {
+        super.populateTemplatePlaceholderData();
     }
 
     @Override
@@ -42,8 +43,8 @@ public class DefaultGenContext extends AbstractGenContext {
     }
 
     @Override
-    protected void prepareBuild() {
-        super.prepareBuild();
+    protected void prepareRun() {
+        super.prepareRun();
     }
 
     @Override

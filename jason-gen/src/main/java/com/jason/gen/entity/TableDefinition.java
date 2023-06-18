@@ -1,4 +1,4 @@
-package com.jason.gen.v2;
+package com.jason.gen.entity;
 
 import lombok.Data;
 
@@ -6,7 +6,7 @@ import java.io.Serializable;
 import java.util.List;
 
 /**
- * TODO
+ * 表定义信息
  *
  * @author guozhongcheng
  * @since 2023/6/13

@@ -1,9 +1,9 @@
-package com.jason.gen.v2;
+package com.jason.gen.entity;
 
 import lombok.Data;
 
 /**
- * TODO
+ * 输出文件定义信息
  *
  * @author gzc
  * @since 2023/6/16 2:57
@@ -27,7 +27,7 @@ public class OutputFileDefinition {
      */
     private String fullOutputFileName;
     /**
-     * 模板文件填充数据
+     * 模板文件占位符填充数据
      */
-    private TemplatePopulateData populateData;
+    private TemplatePlaceholderData populateData;
 }

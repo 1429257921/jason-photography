@@ -1,12 +1,13 @@
-package com.jason.gen.v2;
+package com.jason.gen.entity;
 
+import com.jason.gen.anno.JpNotNull;
 import lombok.Data;
 
 import java.io.Serializable;
 import java.util.List;
 
 /**
- * TODO
+ * 列定义信息
  *
  * @author guozhongcheng
  * @since 2023/6/15

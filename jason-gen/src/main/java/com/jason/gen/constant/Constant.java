@@ -1,13 +1,14 @@
-package com.jason.gen.v2;
+package com.jason.gen.constant;
 
 import cn.hutool.core.text.StrPool;
+import com.jason.gen.enums.ServiceNameEnum;
 
 import java.io.File;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
 /**
- * TODO
+ * 生成器常量池
  *
  * @author guozhongcheng
  * @since 2023/6/14
@@ -16,14 +17,10 @@ public interface Constant {
     Charset CHARSET = StandardCharsets.UTF_8;
     String CHARSET_STR = StandardCharsets.UTF_8.toString();
     String SEPARATOR = File.separator;
-
     String JAVA_PATH = "src" + SEPARATOR + "main" + SEPARATOR + "java";
     String RESOURCES_PATH = "src" + SEPARATOR + "main" + SEPARATOR + "resources";
-
     String JASON_GEN_TEMPLATES_PATH = "jason-gen" + SEPARATOR + RESOURCES_PATH + SEPARATOR + "templates";
-
     String MODULES_PROJECT_NAME = "jason-modules";
-
     String CONTROLLER_PACKAGE = "controller";
     String SERVICE_PACKAGE = "service";
     String SERVICE_IMPL_PACKAGE = "service.impl";

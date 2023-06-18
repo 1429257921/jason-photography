@@ -1,4 +1,9 @@
-package com.jason.gen.v2;
+package com.jason.gen.service;
+
+import com.jason.gen.entity.ColumnDefinition;
+import com.jason.gen.entity.TableDefinition;
+import com.jason.gen.entity.GenArgs;
+import com.jason.gen.util.SqlDataDefinitionParse;
 
 import java.sql.Connection;
 import java.sql.ResultSet;

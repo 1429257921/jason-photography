@@ -1,11 +1,11 @@
-package com.jason.gen.v2;
+package com.jason.gen.entity;
 
 import lombok.Data;
 
 import java.io.Serializable;
 
 /**
- * TODO
+ * 模板定义信息
  *
  * @author guozhongcheng
  * @since 2023/6/14
