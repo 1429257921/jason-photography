@@ -2,6 +2,8 @@ package com.jason.gen.constant;
 
 import cn.hutool.core.text.StrPool;
 import com.jason.gen.enums.ServiceNameEnum;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 
 import java.io.File;
 import java.nio.charset.Charset;
@@ -48,6 +50,24 @@ public interface Constant {
         String FULL_MAPPER_PACKAGE = FULL_PACKAGE + SEPARATOR + MAPPER_PACKAGE.replace(StrPool.DOT, SEPARATOR);
         String FULL_MAPPER_XML_PACKAGE = FULL_RESOURCE_PACKAGE + SEPARATOR + MAPPER_XML_PACKAGE;
         String FULL_ENUM_PACKAGE = Dao.FULL_ENUM_PACKAGE;
+    }
+    @Getter
+    @AllArgsConstructor
+    @SuppressWarnings("all")
+    enum ApiEnum {
+        MODULE_PROJECT_NAME(Constant.Api.MODULE_PROJECT_NAME),
+        BASE_PACKAGE(Constant.Api.BASE_PACKAGE),
+        BASE_PACKAGE_PATH(Constant.Api.BASE_PACKAGE_PATH),
+        FULL_PACKAGE(Constant.Api.FULL_PACKAGE),
+        FULL_RESOURCE_PACKAGE(Constant.Api.FULL_RESOURCE_PACKAGE),
+        FULL_CONTROLLER_PACKAGE(Constant.Api.FULL_CONTROLLER_PACKAGE),
+        FULL_SERVICE_PACKAGE(Constant.Api.FULL_SERVICE_PACKAGE),
+        FULL_ENTITY_PACKAGE(Constant.Api.FULL_ENTITY_PACKAGE),
+        FULL_MAPPER_PACKAGE(Constant.Api.FULL_MAPPER_PACKAGE),
+        FULL_MAPPER_XML_PACKAGE(Constant.Api.FULL_MAPPER_XML_PACKAGE),
+        FULL_ENUM_PACKAGE(Constant.Api.FULL_ENUM_PACKAGE),
+        ;
+        private final String value;
     }
 
     interface Admin {

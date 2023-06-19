@@ -86,11 +86,11 @@ public class ${entityClassName} implements Serializable {
     <#if field.columnName == "del_flag">
 	@TableField("${field.columnName}")
 	@TableLogic
-		<#if field.defaultValue!?? || field.defaultValue?string =="">
-	private ${field.javaTypeName} deleted;
+		<#if field.defaultValue??>
+	private ${field.javaTypeName} deleted = ${field.defaultValue};
             <#continue>
         </#if>
-	private ${field.javaTypeName} deleted = ${field.defaultValue};
+	private ${field.javaTypeName} deleted;
 		<#continue>
     </#if>
 	private ${field.javaTypeName} ${field.javaFieldName};

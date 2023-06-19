@@ -2,9 +2,9 @@ package com.jason.gen.entity;
 
 import cn.hutool.core.text.StrPool;
 import cn.hutool.core.util.ArrayUtil;
-import cn.hutool.core.util.StrUtil;
 import com.jason.gen.constant.Constant;
 import com.jason.gen.enums.ServiceNameEnum;
+import com.jason.gen.enums.TemplateFileNameEnum;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -120,9 +120,9 @@ public class GenArgs implements Serializable {
         private final List<String> filterColumnNamePrefixList = new ArrayList<>(8);
         /**
          * k - 服务名枚举
-         * v - 服务生成配置
+         * v - 服务生成配置集合
          */
-        private final ConcurrentMap<ServiceNameEnum, ServiceGenConfig> serviceGenConfigMap = new ConcurrentHashMap<>(16);
+        private final ConcurrentMap<ServiceNameEnum, List<ServiceGenDefinition>> serviceGenDefinitionMap = new ConcurrentHashMap<>(16);
     }
 
     /**
@@ -166,124 +166,197 @@ public class GenArgs implements Serializable {
         for (String module : initConvertData.moduleList) {
             ServiceNameEnum serviceNameEnum = ServiceNameEnum.get(module);
             if (serviceNameEnum != null) {
-                initConvertData.serviceGenConfigMap.put(serviceNameEnum, this.getServiceGenConfig(module));
+                initConvertData.serviceGenDefinitionMap.put(serviceNameEnum, this.getServiceGenDefinitionList(module));
             }
         }
-        initConvertData.serviceGenConfigMap.forEach(this::populateGenFilePath);
+        initConvertData.serviceGenDefinitionMap.forEach(this::populateGenFilePath);
 
         this.convertData = initConvertData;
+    }
+
+    private List<ServiceGenDefinition> getServiceGenDefinitionList(String module) {
+        List<ServiceGenDefinition> list = new ArrayList<>(16);
+        if (this.genController.contains(module)) {
+            ServiceGenDefinition serviceGenDefinition = new ServiceGenDefinition();
+            serviceGenDefinition.setTypeName(TemplateFileNameEnum.Controller.name());
+            serviceGenDefinition.setIsGen(true);
+            list.add(serviceGenDefinition);
+        }
+        if (this.genService.contains(module)) {
+            ServiceGenDefinition serviceGenDefinition = new ServiceGenDefinition();
+            serviceGenDefinition.setTypeName(TemplateFileNameEnum.Service.name());
+            serviceGenDefinition.setIsGen(true);
+            list.add(serviceGenDefinition);
+        }
+        if (this.genServiceImpl.contains(module)) {
+            ServiceGenDefinition serviceGenDefinition = new ServiceGenDefinition();
+            serviceGenDefinition.setTypeName(TemplateFileNameEnum.ServiceImpl.name());
+            serviceGenDefinition.setIsGen(true);
+            list.add(serviceGenDefinition);
+        }
+        if (this.genEntity.contains(module)) {
+            ServiceGenDefinition serviceGenDefinition = new ServiceGenDefinition();
+            serviceGenDefinition.setTypeName(TemplateFileNameEnum.Entity.name());
+            serviceGenDefinition.setIsGen(true);
+            list.add(serviceGenDefinition);
+        }
+        if (this.genMapper.contains(module)) {
+            ServiceGenDefinition serviceGenDefinition = new ServiceGenDefinition();
+            serviceGenDefinition.setTypeName(TemplateFileNameEnum.Mapper.name());
+            serviceGenDefinition.setIsGen(true);
+            list.add(serviceGenDefinition);
+        }
+        if (this.genMapperXml.contains(module)) {
+            ServiceGenDefinition serviceGenDefinition = new ServiceGenDefinition();
+            serviceGenDefinition.setTypeName(TemplateFileNameEnum.MapperXml.name());
+            serviceGenDefinition.setIsGen(true);
+            list.add(serviceGenDefinition);
+        }
+        if (this.genEnum.contains(module)) {
+            ServiceGenDefinition serviceGenDefinition = new ServiceGenDefinition();
+            serviceGenDefinition.setTypeName(TemplateFileNameEnum.Enum.name());
+            serviceGenDefinition.setIsGen(true);
+            list.add(serviceGenDefinition);
+        }
+        return list;
     }
 
     /**
      * 填充生成的类的文件路径
      */
     @SuppressWarnings("all")
-    private void populateGenFilePath(ServiceNameEnum serviceNameEnum, ServiceGenConfig serviceGenConfig) {
-        if (Constant.Api.SERVICE_NAME == serviceNameEnum) {
-            if (serviceGenConfig.getGenController()) {
-                serviceGenConfig.setGenControllerPath(this.projectPath + Constant.SEPARATOR + Constant.Api.FULL_CONTROLLER_PACKAGE);
-                serviceGenConfig.setPackageController(Constant.Api.BASE_PACKAGE + StrPool.DOT + Constant.CONTROLLER_PACKAGE);
+    private void populateGenFilePath(ServiceNameEnum serviceNameEnum, List<ServiceGenDefinition> serviceGenDefinitionList) {
+        for (ServiceGenDefinition serviceGenDefinition : serviceGenDefinitionList) {
+            if (Constant.Api.SERVICE_NAME == serviceNameEnum) {
+                if (serviceGenDefinition.getIsGen()
+                        && serviceGenDefinition.getTypeName().equalsIgnoreCase(TemplateFileNameEnum.Controller.name())) {
+                    serviceGenDefinition.setPackagePath(Constant.Api.BASE_PACKAGE + StrPool.DOT + Constant.CONTROLLER_PACKAGE);
+                    serviceGenDefinition.setLocalPath(this.projectPath + Constant.SEPARATOR + Constant.Api.FULL_CONTROLLER_PACKAGE);
+                    continue;
+                }
+                if (serviceGenDefinition.getIsGen()
+                        && serviceGenDefinition.getTypeName().equalsIgnoreCase(TemplateFileNameEnum.Service.name())) {
+                    serviceGenDefinition.setPackagePath(Constant.Api.BASE_PACKAGE + StrPool.DOT + Constant.SERVICE_PACKAGE);
+                    serviceGenDefinition.setLocalPath(this.projectPath + Constant.SEPARATOR + Constant.Api.FULL_SERVICE_PACKAGE);
+                    continue;
+                }
+                if (serviceGenDefinition.getIsGen()
+                        && serviceGenDefinition.getTypeName().equalsIgnoreCase(TemplateFileNameEnum.ServiceImpl.name())) {
+                    serviceGenDefinition.setPackagePath(Constant.Api.BASE_PACKAGE + StrPool.DOT + Constant.SERVICE_IMPL_PACKAGE);
+                    serviceGenDefinition.setLocalPath(this.projectPath + Constant.SEPARATOR + Constant.Api.FULL_SERVICE_IMPL_PACKAGE);
+                    continue;
+                }
+                if (serviceGenDefinition.getIsGen()
+                        && serviceGenDefinition.getTypeName().equalsIgnoreCase(TemplateFileNameEnum.Entity.name())) {
+                    serviceGenDefinition.setPackagePath(Constant.Api.BASE_PACKAGE + StrPool.DOT + Constant.ENTITY_PACKAGE);
+                    serviceGenDefinition.setLocalPath(this.projectPath + Constant.SEPARATOR + Constant.Api.FULL_ENTITY_PACKAGE);
+                    continue;
+                }
+                if (serviceGenDefinition.getIsGen()
+                        && serviceGenDefinition.getTypeName().equalsIgnoreCase(TemplateFileNameEnum.Mapper.name())) {
+                    serviceGenDefinition.setPackagePath(Constant.Api.BASE_PACKAGE + StrPool.DOT + Constant.MAPPER_PACKAGE);
+                    serviceGenDefinition.setLocalPath(this.projectPath + Constant.SEPARATOR + Constant.Api.FULL_MAPPER_PACKAGE);
+                    continue;
+                }
+                if (serviceGenDefinition.getIsGen()
+                        && serviceGenDefinition.getTypeName().equalsIgnoreCase(TemplateFileNameEnum.MapperXml.name())) {
+                    serviceGenDefinition.setLocalPath(this.projectPath + Constant.SEPARATOR + Constant.Api.FULL_MAPPER_XML_PACKAGE);
+                    continue;
+                }
+                if (serviceGenDefinition.getIsGen()
+                        && serviceGenDefinition.getTypeName().equalsIgnoreCase(TemplateFileNameEnum.Enum.name())) {
+                    serviceGenDefinition.setPackagePath(Constant.Api.BASE_PACKAGE + StrPool.DOT + Constant.ENUM_PACKAGE);
+                    serviceGenDefinition.setLocalPath(this.projectPath + Constant.SEPARATOR + Constant.Api.FULL_ENUM_PACKAGE);
+                    continue;
+                }
+            } else if (Constant.Admin.SERVICE_NAME == serviceNameEnum) {
+                if (serviceGenDefinition.getIsGen()
+                        && serviceGenDefinition.getTypeName().equalsIgnoreCase(TemplateFileNameEnum.Controller.name())) {
+                    serviceGenDefinition.setPackagePath(Constant.Admin.BASE_PACKAGE + StrPool.DOT + Constant.CONTROLLER_PACKAGE);
+                    serviceGenDefinition.setLocalPath(this.projectPath + Constant.SEPARATOR + Constant.Admin.FULL_CONTROLLER_PACKAGE);
+                    continue;
+                }
+                if (serviceGenDefinition.getIsGen()
+                        && serviceGenDefinition.getTypeName().equalsIgnoreCase(TemplateFileNameEnum.Service.name())) {
+                    serviceGenDefinition.setPackagePath(Constant.Admin.BASE_PACKAGE + StrPool.DOT + Constant.SERVICE_PACKAGE);
+                    serviceGenDefinition.setLocalPath(this.projectPath + Constant.SEPARATOR + Constant.Admin.FULL_SERVICE_PACKAGE);
+                    continue;
+                }
+                if (serviceGenDefinition.getIsGen()
+                        && serviceGenDefinition.getTypeName().equalsIgnoreCase(TemplateFileNameEnum.ServiceImpl.name())) {
+                    serviceGenDefinition.setPackagePath(Constant.Admin.BASE_PACKAGE + StrPool.DOT + Constant.SERVICE_IMPL_PACKAGE);
+                    serviceGenDefinition.setLocalPath(this.projectPath + Constant.SEPARATOR + Constant.Admin.FULL_SERVICE_IMPL_PACKAGE);
+                    continue;
+                }
+                if (serviceGenDefinition.getIsGen()
+                        && serviceGenDefinition.getTypeName().equalsIgnoreCase(TemplateFileNameEnum.Entity.name())) {
+                    serviceGenDefinition.setPackagePath(Constant.Admin.BASE_PACKAGE + StrPool.DOT + Constant.ENTITY_PACKAGE);
+                    serviceGenDefinition.setLocalPath(this.projectPath + Constant.SEPARATOR + Constant.Admin.FULL_ENTITY_PACKAGE);
+                    continue;
+                }
+                if (serviceGenDefinition.getIsGen()
+                        && serviceGenDefinition.getTypeName().equalsIgnoreCase(TemplateFileNameEnum.Mapper.name())) {
+                    serviceGenDefinition.setPackagePath(Constant.Admin.BASE_PACKAGE + StrPool.DOT + Constant.MAPPER_PACKAGE);
+                    serviceGenDefinition.setLocalPath(this.projectPath + Constant.SEPARATOR + Constant.Admin.FULL_MAPPER_PACKAGE);
+                    continue;
+                }
+                if (serviceGenDefinition.getIsGen()
+                        && serviceGenDefinition.getTypeName().equalsIgnoreCase(TemplateFileNameEnum.MapperXml.name())) {
+                    serviceGenDefinition.setLocalPath(this.projectPath + Constant.SEPARATOR + Constant.Admin.FULL_MAPPER_XML_PACKAGE);
+                    continue;
+                }
+                if (serviceGenDefinition.getIsGen()
+                        && serviceGenDefinition.getTypeName().equalsIgnoreCase(TemplateFileNameEnum.Enum.name())) {
+                    serviceGenDefinition.setPackagePath(Constant.Admin.BASE_PACKAGE + StrPool.DOT + Constant.ENUM_PACKAGE);
+                    serviceGenDefinition.setLocalPath(this.projectPath + Constant.SEPARATOR + Constant.Admin.FULL_ENUM_PACKAGE);
+                    continue;
+                }
+            } else if (Constant.Dao.SERVICE_NAME == serviceNameEnum) {
+                if (serviceGenDefinition.getIsGen()
+                        && serviceGenDefinition.getTypeName().equalsIgnoreCase(TemplateFileNameEnum.Controller.name())) {
+                    serviceGenDefinition.setPackagePath(Constant.Dao.BASE_PACKAGE + StrPool.DOT + Constant.CONTROLLER_PACKAGE);
+                    serviceGenDefinition.setLocalPath(this.projectPath + Constant.SEPARATOR + Constant.Dao.FULL_CONTROLLER_PACKAGE);
+                    continue;
+                }
+                if (serviceGenDefinition.getIsGen()
+                        && serviceGenDefinition.getTypeName().equalsIgnoreCase(TemplateFileNameEnum.Service.name())) {
+                    serviceGenDefinition.setPackagePath(Constant.Dao.BASE_PACKAGE + StrPool.DOT + Constant.SERVICE_PACKAGE);
+                    serviceGenDefinition.setLocalPath(this.projectPath + Constant.SEPARATOR + Constant.Dao.FULL_SERVICE_PACKAGE);
+                    continue;
+                }
+                if (serviceGenDefinition.getIsGen()
+                        && serviceGenDefinition.getTypeName().equalsIgnoreCase(TemplateFileNameEnum.ServiceImpl.name())) {
+                    serviceGenDefinition.setPackagePath(Constant.Dao.BASE_PACKAGE + StrPool.DOT + Constant.SERVICE_IMPL_PACKAGE);
+                    serviceGenDefinition.setLocalPath(this.projectPath + Constant.SEPARATOR + Constant.Dao.FULL_SERVICE_IMPL_PACKAGE);
+                    continue;
+                }
+                if (serviceGenDefinition.getIsGen()
+                        && serviceGenDefinition.getTypeName().equalsIgnoreCase(TemplateFileNameEnum.Entity.name())) {
+                    serviceGenDefinition.setPackagePath(Constant.Dao.BASE_PACKAGE + StrPool.DOT + Constant.ENTITY_PACKAGE);
+                    serviceGenDefinition.setLocalPath(this.projectPath + Constant.SEPARATOR + Constant.Dao.FULL_ENTITY_PACKAGE);
+                    continue;
+                }
+                if (serviceGenDefinition.getIsGen()
+                        && serviceGenDefinition.getTypeName().equalsIgnoreCase(TemplateFileNameEnum.Mapper.name())) {
+                    serviceGenDefinition.setPackagePath(Constant.Dao.BASE_PACKAGE + StrPool.DOT + Constant.MAPPER_PACKAGE);
+                    serviceGenDefinition.setLocalPath(this.projectPath + Constant.SEPARATOR + Constant.Dao.FULL_MAPPER_PACKAGE);
+                    continue;
+                }
+                if (serviceGenDefinition.getIsGen()
+                        && serviceGenDefinition.getTypeName().equalsIgnoreCase(TemplateFileNameEnum.MapperXml.name())) {
+                    serviceGenDefinition.setLocalPath(this.projectPath + Constant.SEPARATOR + Constant.Dao.FULL_MAPPER_XML_PACKAGE);
+                    continue;
+                }
+                if (serviceGenDefinition.getIsGen()
+                        && serviceGenDefinition.getTypeName().equalsIgnoreCase(TemplateFileNameEnum.Enum.name())) {
+                    serviceGenDefinition.setPackagePath(Constant.Dao.BASE_PACKAGE + StrPool.DOT + Constant.ENUM_PACKAGE);
+                    serviceGenDefinition.setLocalPath(this.projectPath + Constant.SEPARATOR + Constant.Dao.FULL_ENUM_PACKAGE);
+                    continue;
+                }
+            } else {
+                System.out.println("类型未找到");
             }
-            if (serviceGenConfig.getGenService()) {
-                serviceGenConfig.setGenServicePath(this.projectPath + Constant.SEPARATOR + Constant.Api.FULL_SERVICE_PACKAGE);
-                serviceGenConfig.setPackageService(Constant.Api.BASE_PACKAGE + StrPool.DOT + Constant.SERVICE_PACKAGE);
-            }
-            if (serviceGenConfig.getGenServiceImpl()) {
-                serviceGenConfig.setGenServiceImplPath(this.projectPath + Constant.SEPARATOR + Constant.Api.FULL_SERVICE_IMPL_PACKAGE);
-                serviceGenConfig.setPackageServiceImpl(Constant.Api.BASE_PACKAGE + StrPool.DOT + Constant.SERVICE_IMPL_PACKAGE);
-            }
-            if (serviceGenConfig.getGenEntity()) {
-                serviceGenConfig.setGenEntityPath(this.projectPath + Constant.SEPARATOR + Constant.Api.FULL_ENTITY_PACKAGE);
-                serviceGenConfig.setPackageEntity(Constant.Api.BASE_PACKAGE + StrPool.DOT + Constant.ENTITY_PACKAGE);
-            }
-            if (serviceGenConfig.getGenMapper()) {
-                serviceGenConfig.setGenMapperPath(this.projectPath + Constant.SEPARATOR + Constant.Api.FULL_MAPPER_PACKAGE);
-                serviceGenConfig.setPackageMapper(Constant.Api.BASE_PACKAGE + StrPool.DOT + Constant.MAPPER_PACKAGE);
-            }
-            if (serviceGenConfig.getGenMapperXml()) {
-                serviceGenConfig.setGenMapperXmlPath(this.projectPath + Constant.SEPARATOR + Constant.Api.FULL_MAPPER_XML_PACKAGE);
-            }
-            if (serviceGenConfig.getGenEnum()) {
-                serviceGenConfig.setGenEnumPath(this.projectPath + Constant.SEPARATOR + Constant.Api.FULL_ENUM_PACKAGE);
-                serviceGenConfig.setPackageEnum(Constant.Api.BASE_PACKAGE + StrPool.DOT + Constant.ENUM_PACKAGE);
-            }
-        } else if (Constant.Admin.SERVICE_NAME == serviceNameEnum) {
-            if (serviceGenConfig.getGenController()) {
-                serviceGenConfig.setGenControllerPath(this.projectPath + Constant.SEPARATOR + Constant.Admin.FULL_CONTROLLER_PACKAGE);
-                serviceGenConfig.setPackageController(Constant.Admin.BASE_PACKAGE + StrPool.DOT + Constant.CONTROLLER_PACKAGE);
-            }
-            if (serviceGenConfig.getGenService()) {
-                serviceGenConfig.setGenServicePath(this.projectPath + Constant.SEPARATOR + Constant.Admin.FULL_SERVICE_PACKAGE);
-                serviceGenConfig.setPackageService(Constant.Admin.BASE_PACKAGE + StrPool.DOT + Constant.SERVICE_PACKAGE);
-            }
-            if (serviceGenConfig.getGenServiceImpl()) {
-                serviceGenConfig.setGenServiceImplPath(this.projectPath + Constant.SEPARATOR + Constant.Admin.FULL_SERVICE_IMPL_PACKAGE);
-                serviceGenConfig.setPackageServiceImpl(Constant.Admin.BASE_PACKAGE + StrPool.DOT + Constant.SERVICE_IMPL_PACKAGE);
-            }
-            if (serviceGenConfig.getGenEntity()) {
-                serviceGenConfig.setGenEntityPath(this.projectPath + Constant.SEPARATOR + Constant.Admin.FULL_ENTITY_PACKAGE);
-                serviceGenConfig.setPackageEntity(Constant.Admin.BASE_PACKAGE + StrPool.DOT + Constant.ENTITY_PACKAGE);
-            }
-            if (serviceGenConfig.getGenMapper()) {
-                serviceGenConfig.setGenMapperPath(this.projectPath + Constant.SEPARATOR + Constant.Admin.FULL_MAPPER_PACKAGE);
-                serviceGenConfig.setPackageMapper(Constant.Admin.BASE_PACKAGE + StrPool.DOT + Constant.MAPPER_PACKAGE);
-            }
-            if (serviceGenConfig.getGenMapperXml()) {
-                serviceGenConfig.setGenMapperXmlPath(this.projectPath + Constant.SEPARATOR + Constant.Admin.FULL_MAPPER_XML_PACKAGE);
-            }
-            if (serviceGenConfig.getGenEnum()) {
-                serviceGenConfig.setGenEnumPath(this.projectPath + Constant.SEPARATOR + Constant.Admin.FULL_ENUM_PACKAGE);
-                serviceGenConfig.setPackageEnum(Constant.Admin.BASE_PACKAGE + StrPool.DOT + Constant.ENUM_PACKAGE);
-            }
-        } else if (Constant.Dao.SERVICE_NAME == serviceNameEnum) {
-            if (serviceGenConfig.getGenController()) {
-                serviceGenConfig.setGenControllerPath(this.projectPath + Constant.SEPARATOR + Constant.Dao.FULL_CONTROLLER_PACKAGE);
-                serviceGenConfig.setPackageController(Constant.Dao.BASE_PACKAGE + StrPool.DOT + Constant.CONTROLLER_PACKAGE);
-            }
-            if (serviceGenConfig.getGenService()) {
-                serviceGenConfig.setGenServicePath(this.projectPath + Constant.SEPARATOR + Constant.Dao.FULL_SERVICE_PACKAGE);
-                serviceGenConfig.setPackageService(Constant.Dao.BASE_PACKAGE + StrPool.DOT + Constant.SERVICE_PACKAGE);
-            }
-            if (serviceGenConfig.getGenServiceImpl()) {
-                serviceGenConfig.setGenServiceImplPath(this.projectPath + Constant.SEPARATOR + Constant.Dao.FULL_SERVICE_IMPL_PACKAGE);
-                serviceGenConfig.setPackageServiceImpl(Constant.Dao.BASE_PACKAGE + StrPool.DOT + Constant.SERVICE_IMPL_PACKAGE);
-            }
-            if (serviceGenConfig.getGenEntity()) {
-                serviceGenConfig.setGenEntityPath(this.projectPath + Constant.SEPARATOR + Constant.Dao.FULL_ENTITY_PACKAGE);
-                serviceGenConfig.setPackageEntity(Constant.Dao.BASE_PACKAGE + StrPool.DOT + Constant.ENTITY_PACKAGE);
-            }
-            if (serviceGenConfig.getGenMapper()) {
-                serviceGenConfig.setGenMapperPath(this.projectPath + Constant.SEPARATOR + Constant.Dao.FULL_MAPPER_PACKAGE);
-                serviceGenConfig.setPackageMapper(Constant.Dao.BASE_PACKAGE + StrPool.DOT + Constant.MAPPER_PACKAGE);
-            }
-            if (serviceGenConfig.getGenMapperXml()) {
-                serviceGenConfig.setGenMapperXmlPath(this.projectPath + Constant.SEPARATOR + Constant.Dao.FULL_MAPPER_XML_PACKAGE);
-            }
-            if (serviceGenConfig.getGenEnum()) {
-                serviceGenConfig.setGenEnumPath(this.projectPath + Constant.SEPARATOR + Constant.Dao.FULL_ENUM_PACKAGE);
-                serviceGenConfig.setPackageEnum(Constant.Dao.BASE_PACKAGE + StrPool.DOT + Constant.ENUM_PACKAGE);
-            }
-        } else {
-            System.out.println("类型未找到");
         }
-    }
-
-    /**
-     * 获取服务生成配置对象
-     *
-     * @param module 模块名称
-     * @return 服务生成配置对象
-     */
-    private ServiceGenConfig getServiceGenConfig(String module) {
-        return ServiceGenConfig.builder()
-                .genController(isContain(module, this.genController))
-                .genService(isContain(module, this.genService))
-                .genServiceImpl(isContain(module, this.genServiceImpl))
-                .genEntity(isContain(module, this.genEntity))
-                .genMapper(isContain(module, this.genMapper))
-                .genMapperXml(isContain(module, this.genMapperXml))
-                .genEnum(isContain(module, this.genEnum))
-                .build();
     }
 
     /**
@@ -301,23 +374,5 @@ public class GenArgs implements Serializable {
         List<String> list = Arrays.asList(tableArr);
         list.forEach(table -> table = table.trim());
         return list;
-    }
-
-    /**
-     * 将params按照逗号拆分成数组，遍历数组全量匹配param
-     *
-     * @param param  需要匹配的字符串
-     * @param params 匹配的字符串
-     * @return 是否匹配上
-     */
-    private static boolean isContain(String param, String params) {
-        if (StrUtil.isNotBlank(param) && StrUtil.isNotBlank(params)) {
-            String[] split = params.split(StrPool.COMMA);
-            if (ArrayUtil.isNotEmpty(split)) {
-                String filterResult = Arrays.stream(split).filter(n -> n.equalsIgnoreCase(param)).findFirst().orElse(null);
-                return StrUtil.isNotBlank(filterResult);
-            }
-        }
-        return false;
     }
 }

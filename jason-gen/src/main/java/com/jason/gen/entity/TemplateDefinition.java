@@ -21,7 +21,7 @@ public class TemplateDefinition implements Serializable {
      */
     private String templateFileName;
     /**
-     * 模板文件名称（文件名称+小数点+文件扩展名）
+     * 模板文件名称（文件名称 + 小数点 + 文件扩展名）
      */
     private String fullTemplateFileName;
     /**

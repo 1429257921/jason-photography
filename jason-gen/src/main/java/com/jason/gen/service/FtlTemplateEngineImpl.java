@@ -35,11 +35,11 @@ public class FtlTemplateEngineImpl implements TemplateEngine {
         for (TemplateFileNameEnum templateFileNameEnum : TemplateFileNameEnum.values()) {
             TemplateDefinition definition = new TemplateDefinition();
             String templateFileName = templateFileNameEnum.name();
-            String fullTemplateFileName = templateFileNameEnum.name() + ".ftl";
+            String fullTemplateFileName = templateFileName + ".ftl";
             definition.setTemplateFileName(templateFileName);
             definition.setFullTemplateFileName(fullTemplateFileName);
             definition.setBaseTemplateFilePath(templatePath);
-            definition.setJavaClassNameSuffix(TemplateFileNameEnum.getJavaClassNameSuffix(templateFileNameEnum));
+            definition.setJavaClassNameSuffix(templateFileNameEnum.getJavaClassNameSuffix());
             if (!FileUtil.exist(templatePath + Constant.SEPARATOR + fullTemplateFileName)) {
                 throw new Exception("模板文件【" + fullTemplateFileName + "】在目录：" + templatePath + " 下未找到！");
             }
@@ -57,7 +57,10 @@ public class FtlTemplateEngineImpl implements TemplateEngine {
      * @param outputFileDefinitionMap 输出文件定义信息集合
      */
     @Override
-    public void populateTemplateDefinition(@NotNull ConcurrentMap<TemplateFileNameEnum, TemplateDefinition> templateDefinitionMap, @NotNull ConcurrentMap<String, TableDefinition> tableDefinitionMap, @NotNull ConcurrentMap<String, TypeConvertDefinition> typeConvertMap, @NotNull ConcurrentMap<ServiceNameEnum, List<OutputFileDefinition>> outputFileDefinitionMap) {
+    public void populateTemplateDefinition(@NotNull ConcurrentMap<TemplateFileNameEnum, TemplateDefinition> templateDefinitionMap,
+                                           @NotNull ConcurrentMap<String, TableDefinition> tableDefinitionMap,
+                                           @NotNull ConcurrentMap<String, TypeConvertDefinition> typeConvertMap,
+                                           @NotNull ConcurrentMap<ServiceNameEnum, List<OutputFileDefinition>> outputFileDefinitionMap) {
         TemplatePlaceholderData commonTemplatePlaceholderData = null;
         for (List<OutputFileDefinition> outputFileDefinitionList : outputFileDefinitionMap.values()) {
             for (OutputFileDefinition outputFileDefinition : outputFileDefinitionList) {
@@ -74,9 +77,11 @@ public class FtlTemplateEngineImpl implements TemplateEngine {
         if (commonTemplatePlaceholderData != null) {
             for (List<OutputFileDefinition> outputFileDefinitionList : outputFileDefinitionMap.values()) {
                 for (OutputFileDefinition outputFileDefinition : outputFileDefinitionList) {
-                    TemplatePlaceholderData tempCommonTemplatePlaceholderData = BeanUtil.copyProperties(commonTemplatePlaceholderData, TemplatePlaceholderData.class, "enumClassName", "packageEnum", "enumColumnDefinition");
+                    TemplatePlaceholderData tempCommonTemplatePlaceholderData = BeanUtil.copyProperties(commonTemplatePlaceholderData,
+                            TemplatePlaceholderData.class, "enumClassName", "packageEnum", "enumColumnDefinition");
                     TemplatePlaceholderData populateData = outputFileDefinition.getPopulateData();
                     tempCommonTemplatePlaceholderData.setPackageEnum(populateData.getPackageEnum());
+                    tempCommonTemplatePlaceholderData.setModuleName(populateData.getModuleName());
                     tempCommonTemplatePlaceholderData.setEnumClassName(populateData.getEnumClassName());
                     tempCommonTemplatePlaceholderData.setEnumColumnDefinition(populateData.getEnumColumnDefinition());
                     outputFileDefinition.setPopulateData(tempCommonTemplatePlaceholderData);
