@@ -11,11 +11,6 @@
     <description>坤坤系统代码生成模块</description>
 
     <dependencies>
-        <dependency>
-            <groupId>com.jason</groupId>
-            <artifactId>jason-common-log</artifactId>
-            <version>4.0</version>
-        </dependency>
         <!--模板引擎-->
         <dependency>
             <groupId>org.springframework.boot</groupId>
